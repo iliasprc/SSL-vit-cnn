@@ -58,13 +58,17 @@ def main():
 
     training_generator, val_generator, test_generator, class_dict = select_dataset(config)
     n_classes = len(class_dict)
-    pretrain = 'byol'
+    pretrain = 'None'
     if pretrain == 'imagenet':
         model = select_model(config, n_classes, pretrained=True)
-    elif pretrain == 'imagenet':
+    elif pretrain == 'byol':
         model = select_model(config, n_classes, pretrained=False)
-        model = byol_pretrain(model, 32)
+        #d = byol_pretrain(model, 224)
 
+        checkpoint = torch.load('./improved-net.pt')
+        model.load_state_dict(checkpoint)
+    else:
+        model = select_model(config, n_classes, pretrained=False)
     log.info(f"{model}")
 
     if (config.load):

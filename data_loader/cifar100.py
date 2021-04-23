@@ -6,18 +6,20 @@ import torchvision
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import transforms
 
+size = 224
 train_transform = transforms.Compose([
-    transforms.Resize(36),
-    transforms.RandomResizedCrop((32), scale=(0.8, 1.2)),
+    transforms.Resize(size),
+    transforms.RandomResizedCrop((size), scale=(0.8, 1.2)),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 val_transform = transforms.Compose([
-    transforms.Resize(32),
+    transforms.Resize(size),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
+
 
 
 def cifar100(config):
