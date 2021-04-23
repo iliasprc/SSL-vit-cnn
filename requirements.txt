@@ -9,4 +9,4 @@ tensorboard
 omegaconf
 byol-pytorch
 einops
-pydicom
+timm

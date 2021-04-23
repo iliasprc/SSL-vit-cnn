@@ -410,10 +410,10 @@ def select_optimizer(model, config, checkpoint=None):
     return optimizer, None
 
 
-def select_model(config, n_classes):
+def select_model(config, n_classes,pretrained=True):
 
     if config.model.name in ['resnet18', 'mobilenet_v2', 'densenet121', 'resneXt','efficientnet_b1']:
-        return CNN(n_classes, config.model.name)
+        return CNN(n_classes, config.model.name,pretrained=pretrained)
     elif config.model.name == 'vit':
         return ViT(
             image_size=224,

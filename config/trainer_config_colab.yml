@@ -5,7 +5,7 @@ trainer:
   seed: 123 # randomness seed
   cuda: True # use nvidia gpu
   gpu: 0,1 # id of gpu
-  save: True # save checkpoint
+  save: /content/drive/My Drive/CNNs/ # save checkpoint
   load: False # load pretrained checkpoint
   gradient_accumulation: 1 # gradient accumulation steps
   pretrained_cpkt: cpkt.pt

@@ -1,7 +1,7 @@
 import torch
 from byol_pytorch import BYOL
 
-from model import CNN, CovidNet, ViT
+from model import CovidNet, ViT
 
 n_classes = 3
 
@@ -23,17 +23,10 @@ model = ViT(
     emb_dropout=0.1
 )
 print(model)
-learner = BYOL(
-    model,
-    image_size=224,
-    hidden_layer='fc2'
-)
-
-opt = torch.optim.Adam(learner.parameters(), lr=1e-4)
 
 
-def sample_unlabelled_images():
-    return torch.randn(20, 3, 224, 224)
+def sample_unlabelled_images(size=224):
+    return torch.randn(32, 3, size, size)
 
 
 for _ in range(100):
@@ -47,3 +40,22 @@ for _ in range(100):
 
 # save your improved network
 torch.save(model.state_dict(), './improved-covidnet_small.pt')
+
+
+def byol_pretrain(model, size=224):
+    learner = BYOL(
+        model,
+        image_size=size,
+        hidden_layer='fc2'
+    )
+
+    opt = torch.optim.Adam(learner.parameters(), lr=1e-4)
+    for _ in range(100):
+        images = sample_unlabelled_images(size)
+        loss = learner(images)
+        opt.zero_grad()
+        loss.backward()
+        print(loss.item())
+        opt.step()
+        learner.update_moving_average()  # update moving average of target encoder
+    return model

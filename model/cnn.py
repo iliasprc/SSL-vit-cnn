@@ -4,7 +4,7 @@ from torchvision import models
 import timm
 
 class CNN(nn.Module):
-    def __init__(self, num_classes, model='resnet50', pretrained=True):
+    def __init__(self, num_classes, model='resnet50', pretrained=False):
         super(CNN, self).__init__()
         if (model == 'resnet50'):
             self.cnn = models.resnet50(pretrained=pretrained)
