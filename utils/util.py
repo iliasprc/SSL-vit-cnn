@@ -411,12 +411,8 @@ def select_optimizer(model, config, checkpoint=None):
 
 
 def select_model(config, n_classes):
-    if config.model.name == 'COVIDNet_small':
-        return CovidNet('small', n_classes=n_classes)
 
-    elif config.model.name == 'COVIDNet_large':
-        return CovidNet('large', n_classes=n_classes)
-    elif config.model.name in ['resnet18', 'mobilenet_v2', 'densenet121', 'resneXt']:
+    if config.model.name in ['resnet18', 'mobilenet_v2', 'densenet121', 'resneXt','efficientnet_b1']:
         return CNN(n_classes, config.model.name)
     elif config.model.name == 'vit':
         return ViT(

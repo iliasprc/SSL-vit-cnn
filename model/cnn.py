@@ -1,5 +1,5 @@
 import torch.nn as nn
-
+import timm
 from torchvision import models
 import timm
 
@@ -20,6 +20,9 @@ class CNN(nn.Module):
         elif (model == 'densenet121'):
             self.cnn = models.densenet121(pretrained=pretrained)
             self.cnn.classifier = nn.Linear(1024, num_classes)
+        elif model =='efficientnet_b1':
+
+            self.cnn  = timm.create_model('efficientnet_b1', pretrained=True,num_classes=num_classes)
 
     def forward(self, x):
 

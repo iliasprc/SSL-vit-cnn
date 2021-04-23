@@ -9,9 +9,9 @@ trainer:
   load: False # load pretrained checkpoint
   gradient_accumulation: 1 # gradient accumulation steps
   pretrained_cpkt: cpkt.pt
-  log_interval: 1000 # print statistics every log_interval
+  log_interval: 10000 # print statistics every log_interval
   model:
-    name: mobilenet_v2 # model name  [mobilenet_v2,COVIDNet_small]
+    name: efficientnet_b1 # model name  [mobilenet_v2,COVIDNet_small]
     pretrained: True
     optimizer: # optimizer configuration
       type: SGD # optimizer type
@@ -25,11 +25,11 @@ trainer:
       scheduler_verbose: 5e-6 # print if learning rate is changed
   dataloader:
     train:
-      batch_size: 16 # batch size
+      batch_size: 32 # batch size
       shuffle: True # shuffle samples after every epoch
-      num_workers: 2 # number of thread for dataloader1
+      num_workers: 6 # number of thread for dataloader1
     val:
-      batch_size: 16
+      batch_size: 32
       shuffle: False
       num_workers: 2
     test:
