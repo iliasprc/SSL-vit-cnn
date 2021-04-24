@@ -56,46 +56,89 @@ class SimSiamTransform():
 
 def ssl_dataset(config):
     root_dir = os.path.join(config.cwd, config.dataset.input_data)
+    if config.dataset.name == 'CIFAR100':
+        train_transform = SimSiamTransform(32)
+        # val_transform = SimSiamTransform(32)
+        val_transform = transforms.Compose([
+            transforms.Resize(32),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+        train_dataset = torchvision.datasets.CIFAR100(root=root_dir, transform=train_transform, train=True,
+                                                      download=True)
 
-    train_transform = SimSiamTransform(32)
-    # val_transform = SimSiamTransform(32)
-    val_transform = transforms.Compose([
-        transforms.Resize(32),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-    train_dataset = torchvision.datasets.CIFAR100(root=root_dir, transform=train_transform, train=True,
-                                                  download=True)
+        feature_bank_dataset = torchvision.datasets.CIFAR100(root=root_dir, transform=val_transform, train=True,
+                                                      download=True)
+        valid_dataset = torchvision.datasets.CIFAR100(root=root_dir, transform=val_transform, train=True,
+                                                      download=True)
+        valid_size = 0.2
+        num_train = len(train_dataset)
+        indices = list(range(num_train))
+        split = int(np.floor(valid_size * num_train))
 
-    feature_bank_dataset = torchvision.datasets.CIFAR100(root=root_dir, transform=val_transform, train=True,
-                                                  download=True)
-    valid_dataset = torchvision.datasets.CIFAR100(root=root_dir, transform=val_transform, train=True,
-                                                  download=True)
-    valid_size = 0.2
-    num_train = len(train_dataset)
-    indices = list(range(num_train))
-    split = int(np.floor(valid_size * num_train))
+        np.random.shuffle(indices)
 
-    np.random.shuffle(indices)
+        train_idx, valid_idx = indices[split:], indices[:split]
+        train_sampler = SubsetRandomSampler(train_idx)
 
-    train_idx, valid_idx = indices[split:], indices[:split]
-    train_sampler = SubsetRandomSampler(train_idx)
+        valid_sampler = SubsetRandomSampler(valid_idx)
+        val_params = {'batch_size' : config.batch_size,
+                      'num_workers': config.dataloader.val.num_workers,
+                      'pin_memory' : False}
 
-    valid_sampler = SubsetRandomSampler(valid_idx)
-    val_params = {'batch_size' : config.batch_size,
-                  'num_workers': config.dataloader.val.num_workers,
-                  'pin_memory' : False}
+        train_params = {'batch_size' : config.batch_size,
+                        'num_workers': config.dataloader.train.num_workers,
+                        'pin_memory' : False}
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, **train_params, sampler=train_sampler
+        )
+        valid_loader = torch.utils.data.DataLoader(
+            valid_dataset, **val_params, sampler=valid_sampler
+        )
+        fbank_loader = torch.utils.data.DataLoader(
+            valid_dataset, **val_params, sampler=train_sampler
+        )
+        return train_loader,fbank_loader, valid_loader,  train_dataset.classes
+    elif config.dataset.name == 'CIFAR10':
+        train_transform = SimSiamTransform(32)
+        # val_transform = SimSiamTransform(32)
+        val_transform = transforms.Compose([
+            transforms.Resize(32),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+        train_dataset = torchvision.datasets.CIFAR10(root=root_dir, transform=train_transform, train=True,
+                                                      download=True)
 
-    train_params = {'batch_size' : config.batch_size,
-                    'num_workers': config.dataloader.train.num_workers,
-                    'pin_memory' : False}
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, **train_params, sampler=train_sampler
-    )
-    valid_loader = torch.utils.data.DataLoader(
-        valid_dataset, **val_params, sampler=valid_sampler
-    )
-    fbank_loader = torch.utils.data.DataLoader(
-        valid_dataset, **val_params, sampler=train_sampler
-    )
-    return train_loader,fbank_loader, valid_loader,  train_dataset.classes
+        feature_bank_dataset = torchvision.datasets.CIFAR10(root=root_dir, transform=val_transform, train=True,
+                                                             download=True)
+        valid_dataset = torchvision.datasets.CIFAR10(root=root_dir, transform=val_transform, train=True,
+                                                      download=True)
+        valid_size = 0.2
+        num_train = len(train_dataset)
+        indices = list(range(num_train))
+        split = int(np.floor(valid_size * num_train))
+
+        np.random.shuffle(indices)
+
+        train_idx, valid_idx = indices[split:], indices[:split]
+        train_sampler = SubsetRandomSampler(train_idx)
+
+        valid_sampler = SubsetRandomSampler(valid_idx)
+        val_params = {'batch_size' : config.batch_size,
+                      'num_workers': config.dataloader.val.num_workers,
+                      'pin_memory' : False}
+
+        train_params = {'batch_size' : config.batch_size,
+                        'num_workers': config.dataloader.train.num_workers,
+                        'pin_memory' : False}
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, **train_params, sampler=train_sampler
+        )
+        valid_loader = torch.utils.data.DataLoader(
+            valid_dataset, **val_params, sampler=valid_sampler
+        )
+        fbank_loader = torch.utils.data.DataLoader(
+            valid_dataset, **val_params, sampler=train_sampler
+        )
+        return train_loader, fbank_loader, valid_loader, train_dataset.classes
