@@ -8,8 +8,8 @@ trainer:
   shape: 32
   save: True # save checkpoint
   load: False # load pretrained checkpoint
-  gradient_accumulation: 2 # gradient accumulation steps
-  batch_size: 512
+  gradient_accumulation: 4 # gradient accumulation steps
+  batch_size: 256
   pretrained_cpkt: cpkt.pt
   log_interval: 10 # print statistics every log_interval
   model:

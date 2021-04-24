@@ -97,7 +97,7 @@ class SimSiam(nn.Module):
     def __init__(self, config, backbone=None):
         super().__init__()
 
-        self.backbone, in_feats = select_backbone(backbone, pretrained=False)
+        self.backbone, in_feats = select_backbone(config,backbone, pretrained=False)
         self.projector = projection_MLP(in_feats)
 
         self.encoder = nn.Sequential(  # f encoder
