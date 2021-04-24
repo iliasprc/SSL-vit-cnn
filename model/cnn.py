@@ -72,7 +72,9 @@ class ByolCNN(nn.Module):
 
         elif (model == 'densenet121'):
             self.cnn = models.densenet121(pretrained=pretrained)
+        elif model =='efficientnet_b0':
 
+            self.cnn  = timm.create_model('efficientnet_b0', pretrained=pretrained)
         elif model =='efficientnet_b1':
 
             self.cnn  = timm.create_model('efficientnet_b1', pretrained=pretrained)

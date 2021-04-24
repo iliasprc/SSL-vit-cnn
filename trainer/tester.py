@@ -72,10 +72,10 @@ class Tester(BaseTrainer):
                 writer_step = (epoch - 1) * len(loader) + batch_idx
 
                 prediction = torch.max(output, 1)
-                acc = np.sum(prediction[1].cpu().numpy() == target.cpu().numpy()) / target.size(0)
+                acc = np.sum(prediction[1].cpu().numpy() == target.cpu().numpy()) / target.SIZE(0)
 
                 self.valid_metrics.update(key='loss',value=loss.item(),n=1,writer_step=writer_step)
-                self.valid_metrics.update(key='acc', value=np.sum(prediction[1].cpu().numpy() == target.cpu().numpy()), n=target.size(0), writer_step=writer_step)
+                self.valid_metrics.update(key='acc', value=np.sum(prediction[1].cpu().numpy() == target.cpu().numpy()), n=target.SIZE(0), writer_step=writer_step)
 
         self._progress(batch_idx, epoch, metrics=self.valid_metrics, mode=mode, print_summary=True)
 

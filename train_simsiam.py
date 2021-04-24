@@ -64,7 +64,7 @@ def main():
     training_generator, val_generator, test_generator, class_dict = ssl_dataset(config)
     log.info(f'{len(training_generator)*256} {len(val_generator)} {len(test_generator)}')
     n_classes = len(class_dict)
-    model = SimSiam(config.model.name)
+    model = SimSiam(config,config.model.name)
 
     log.info(f"{model}")
 

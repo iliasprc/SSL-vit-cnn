@@ -50,7 +50,7 @@ class projection_MLP(nn.Module):
         self.num_layers = num_layers
 
     def forward(self, x):
-        #print(x.shape)
+        # print(x.shape)
         if self.num_layers == 3:
             x = self.layer1(x)
             x = self.layer2(x)
@@ -87,14 +87,14 @@ class prediction_MLP(nn.Module):
         """
 
     def forward(self, x):
-        #print(x.shape)
+        # print(x.shape)
         x = self.layer1(x)
         x = self.layer2(x)
         return x
 
 
 class SimSiam(nn.Module):
-    def __init__(self, backbone=None):
+    def __init__(self, config, backbone=None):
         super().__init__()
 
         self.backbone, in_feats = select_backbone(backbone, pretrained=False)
@@ -108,21 +108,27 @@ class SimSiam(nn.Module):
 
     def forward(self, x1, x2):
         f, h = self.encoder, self.predictor
-        #print(x1.shape,x2.shape)
+        # print(x1.shape,x2.shape)
         z1, z2 = f(x1), f(x2)
         p1, p2 = h(z1), h(z2)
         L = D(p1, z2) / 2 + D(p2, z1) / 2
         return L
 
 
-def select_backbone(model, pretrained=False):
+def select_backbone(config, model, pretrained=False):
     print(model)
+    shape = int(config.shape)
     if (model == 'resnet50'):
         cnn = models.resnet50(pretrained=pretrained)
+        if shape == 32:
+            cnn.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
         cnn.fc = nn.Identity()
         in_feats = 2048
     elif (model == 'resnet18'):
         cnn = models.resnet18(pretrained=pretrained)
+        if shape == 32:
+            cnn.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        cnn.fc = nn.Identity()
         cnn.fc = nn.Identity()
         in_feats = 512
     elif (model == 'resnext50_32x4d'):
@@ -136,12 +142,18 @@ def select_backbone(model, pretrained=False):
     elif (model == 'densenet121'):
         cnn = models.densenet121(pretrained=pretrained)
         in_feats = 1024
+    elif model == 'efficientnet_b0':
 
+        cnn = timm.create_model('efficientnet_b0', pretrained=pretrained)
+        if shape == 32:
+            cnn.conv_stem = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
+        cnn.classifier = nn.Identity()
+        in_feats = 1280
     elif model == 'efficientnet_b1':
 
         cnn = timm.create_model('efficientnet_b1', pretrained=pretrained)
         in_feats = 1280
-    #cnn = nn.Sequential(*list(cnn.children())[:-1])  # do not return classifier
+    # cnn = nn.Sequential(*list(cnn.children())[:-1])  # do not return classifier
     return cnn, in_feats
 
 
@@ -152,7 +164,7 @@ def knn_monitor(net, val_data_loader, test_data_loader, epoch, logger, k=200, t=
     total_top1, total_top5, total_num, feature_bank = 0.0, 0.0, 0, []
     with torch.no_grad():
         # generate feature bank
-        for (data,data2), target in val_data_loader:
+        for (data, data2), target in val_data_loader:
             feature = net(data.cuda(non_blocking=True))
             feature = F.normalize(feature, dim=1)
             feature_bank.append(feature)

@@ -51,7 +51,7 @@ def write_train_val_score(writer, epoch, train_stats, val_stats):
 
 def showgradients(model):
     for param in model.parameters():
-        print(type(param.data), param.size())
+        print(type(param.data), param.SIZE())
         print("GRADS= \n", param.grad)
 
 

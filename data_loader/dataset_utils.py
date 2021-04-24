@@ -6,6 +6,7 @@ import torchvision
 from torch.utils.data.sampler import SubsetRandomSampler
 
 from data_loader.cifar100 import cifar100
+from data_loader.random_dataset import RandomDataset
 
 
 def select_dataset(config):
@@ -55,13 +56,14 @@ class SimSiamTransform():
 
 
 def ssl_dataset(config):
+    SIZE = int(config.shape)
     root_dir = os.path.join(config.cwd, config.dataset.input_data)
     if config.dataset.name == 'CIFAR100':
-        size = 224
-        train_transform = SimSiamTransform(size)
+
+        train_transform = SimSiamTransform(SIZE)
         # val_transform = SimSiamTransform(32)
         val_transform = transforms.Compose([
-            transforms.Resize(size),
+            transforms.Resize(SIZE),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
@@ -69,7 +71,7 @@ def ssl_dataset(config):
                                                       download=True)
 
         feature_bank_dataset = torchvision.datasets.CIFAR100(root=root_dir, transform=val_transform, train=True,
-                                                      download=True)
+                                                             download=True)
         valid_dataset = torchvision.datasets.CIFAR100(root=root_dir, transform=val_transform, train=True,
                                                       download=True)
         valid_size = 0.2
@@ -99,23 +101,23 @@ def ssl_dataset(config):
         fbank_loader = torch.utils.data.DataLoader(
             feature_bank_dataset, **val_params, sampler=train_sampler
         )
-        return train_loader,fbank_loader, valid_loader,  train_dataset.classes
+        return train_loader, fbank_loader, valid_loader, train_dataset.classes
     elif config.dataset.name == 'CIFAR10':
-        size = 224
-        train_transform = SimSiamTransform(size)
+
+        train_transform = SimSiamTransform(SIZE)
         # val_transform = SimSiamTransform(32)
         val_transform = transforms.Compose([
-            transforms.Resize(size),
+            transforms.Resize(SIZE),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
         train_dataset = torchvision.datasets.CIFAR10(root=root_dir, transform=train_transform, train=True,
-                                                      download=True)
+                                                     download=True)
 
         feature_bank_dataset = torchvision.datasets.CIFAR10(root=root_dir, transform=val_transform, train=True,
-                                                             download=True)
+                                                            download=True)
         valid_dataset = torchvision.datasets.CIFAR10(root=root_dir, transform=val_transform, train=False,
-                                                      download=True)
+                                                     download=True)
         valid_size = 0.2
         num_train = len(train_dataset)
         indices = list(range(num_train))
@@ -144,26 +146,49 @@ def ssl_dataset(config):
             feature_bank_dataset, **val_params
         )
         return train_loader, fbank_loader, valid_loader, train_dataset.classes
+    elif config.dataset.name == 'random':
+
+        train_transform = SimSiamTransform(SIZE)
+        dataset = RandomDataset(transform=train_transform)
+        val_params = {'batch_size' : config.batch_size,
+                      'num_workers': config.dataloader.val.num_workers,
+                      'pin_memory' : False}
+
+        train_params = {'batch_size' : config.batch_size,
+                        'num_workers': config.dataloader.train.num_workers,
+                        'pin_memory' : False}
+        train_loader = torch.utils.data.DataLoader(
+            dataset, **train_params
+        )
+        valid_loader = torch.utils.data.DataLoader(
+            dataset, **val_params
+        )
+        fbank_loader = torch.utils.data.DataLoader(
+            dataset, **val_params
+        )
+        return train_loader, fbank_loader, valid_loader, dataset.classes
 
 
 def get_dataset(dataset, data_dir, transform, train=True, download=True, debug_subset_size=None):
     if dataset == 'mnist':
         dataset = torchvision.datasets.MNIST(data_dir, train=train, transform=transform, download=download)
     elif dataset == 'stl10':
-        dataset = torchvision.datasets.STL10(data_dir, split='train+unlabeled' if train else 'test', transform=transform, download=download)
+        dataset = torchvision.datasets.STL10(data_dir, split='train+unlabeled' if train else 'test',
+                                             transform=transform, download=download)
     elif dataset == 'cifar10':
         dataset = torchvision.datasets.CIFAR10(data_dir, train=train, transform=transform, download=download)
     elif dataset == 'cifar100':
         dataset = torchvision.datasets.CIFAR100(data_dir, train=train, transform=transform, download=download)
     elif dataset == 'imagenet':
-        dataset = torchvision.datasets.ImageNet(data_dir, split='train' if train == True else 'val', transform=transform, download=download)
+        dataset = torchvision.datasets.ImageNet(data_dir, split='train' if train == True else 'val',
+                                                transform=transform, download=download)
     elif dataset == 'random':
         dataset = RandomDataset()
     else:
         raise NotImplementedError
 
     if debug_subset_size is not None:
-        dataset = torch.utils.data.Subset(dataset, range(0, debug_subset_size)) # take only one batch
+        dataset = torch.utils.data.Subset(dataset, range(0, debug_subset_size))  # take only one batch
         dataset.classes = dataset.dataset.classes
         dataset.targets = dataset.dataset.targets
     print(dataset.classes)

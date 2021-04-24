@@ -53,6 +53,7 @@ class SimSiamTrainer(BaseTrainer):
         for epoch in range(self.start_epoch, self.epochs):
             # torch.manual_seed(self.config.seed)
             self._train_epoch(epoch)
+            self.checkpointer(epoch)
 
     def _train_epoch(self, epoch):
         self.model.train()
@@ -80,16 +81,17 @@ class SimSiamTrainer(BaseTrainer):
 
             self.train_metrics.update(key='loss', value=loss.item(), n=1, writer_step=writer_step)
             self._progress(batch_idx, epoch, metrics=self.train_metrics, mode='train')
-        accuracy = knn_monitor(self.model.backbone, val_data_loader=self.train_data_loader,
-                               test_data_loader=self.valid_data_loader, epoch= epoch,logger= self.logger
-                               )
+        # accuracy = knn_monitor(self.model.backbone, val_data_loader=self.train_data_loader,
+        #                        test_data_loader=self.valid_data_loader, epoch= epoch,logger= self.logger
+        #                        )
         self._progress(batch_idx, epoch, metrics=self.train_metrics, mode='train', print_summary=True)
 
     def checkpointer(self, epoch):
 
         save_model(self.checkpoint_dir, self.model, self.optimizer, self.train_metrics.avg('loss'), epoch,
                    f'_model_last')
-
+        save_model(self.checkpoint_dir, self.model.backbone, self.optimizer, self.train_metrics.avg('loss'), epoch,
+                   f'_backbone_last')
     def _progress(self, batch_idx, epoch, metrics, mode='', print_summary=False):
         metrics_string = metrics.calc_all_metrics()
         if ((batch_idx * self.config.batch_size) % self.log_step == 0):
