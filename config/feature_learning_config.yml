@@ -1,22 +1,23 @@
 trainer:
   cwd: /home/ # working directory
   logger: CNNS # logger name
-  epochs: 30 # number of training epochs
+  epochs: 100 # number of training epochs
   seed: 123 # randomness seed
   cuda: True # use nvidia gpu
   gpu: 0,1 # id of gpu
   save: True # save checkpoint
   load: False # load pretrained checkpoint
   gradient_accumulation: 16 # gradient accumulation steps
+  batch_size: 64
   pretrained_cpkt: cpkt.pt
   log_interval: 10000 # print statistics every log_interval
   model:
-    name: efficientnet_b1 # model name  [mobilenet_v2,COVIDNet_small]
-    pretrained: True
+    name: resnet18 # model name  [mobilenet_v2,COVIDNet_small]
+    pretrained: False
     optimizer: # optimizer configuration
       type: SGD # optimizer type
       lr: 1e-2 # learning rate
-      weight_decay: 0.000001 # weight decay
+      weight_decay: 0.00001 # weight decay
     scheduler: # learning rate scheduler
       type: ReduceLRonPlateau # type of scheduler
       scheduler_factor: 0.5 # learning rate change ratio
@@ -25,15 +26,12 @@ trainer:
       scheduler_verbose: 5e-6 # print if learning rate is changed
   dataloader:
     train:
-      batch_size: 16 # batch size
       shuffle: True # shuffle samples after every epoch
       num_workers: 6 # number of thread for dataloader1
     val:
-      batch_size: 16
       shuffle: False
       num_workers: 2
     test:
-      batch_size: 1
       shuffle: False
       num_workers: 2
   dataset:

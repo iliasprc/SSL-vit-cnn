@@ -20,7 +20,7 @@ def byol_pretrain(model, size=224):
     )
 
     opt = torch.optim.Adam(learner.parameters(), lr=1e-4)
-    for idx in range(100):
+    for idx in range(50):
         images = sample_unlabelled_images(size)
         loss = learner(images)
         opt.zero_grad()

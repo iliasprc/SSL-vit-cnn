@@ -11,8 +11,13 @@ import torch
 import torch.optim as optim
 
 from model.cnn import CNN
-
 from model.vit import ViT
+
+
+def _create_model_training_folder(writer, files_to_same=0):
+    model_checkpoints_folder = os.path.join(writer.log_dir, 'checkpoints')
+    if not os.path.exists(model_checkpoints_folder):
+        os.makedirs(model_checkpoints_folder)
 
 
 def write_score(writer, iter, mode, metrics):
@@ -22,24 +27,24 @@ def write_score(writer, iter, mode, metrics):
 
 def write_train_val_score(writer, epoch, train_stats, val_stats):
     writer.add_scalars('Loss', {'train': train_stats[0],
-                                'val': val_stats[0],
+                                'val'  : val_stats[0],
                                 }, epoch)
     writer.add_scalars('Coeff', {'train': train_stats[1],
-                                 'val': val_stats[1],
+                                 'val'  : val_stats[1],
                                  }, epoch)
 
     writer.add_scalars('Air', {'train': train_stats[2],
-                               'val': val_stats[2],
+                               'val'  : val_stats[2],
                                }, epoch)
 
     writer.add_scalars('CSF', {'train': train_stats[3],
-                               'val': val_stats[3],
+                               'val'  : val_stats[3],
                                }, epoch)
     writer.add_scalars('GM', {'train': train_stats[4],
-                              'val': val_stats[4],
+                              'val'  : val_stats[4],
                               }, epoch)
     writer.add_scalars('WM', {'train': train_stats[5],
-                              'val': val_stats[5],
+                              'val'  : val_stats[5],
                               }, epoch)
     return
 
@@ -103,10 +108,10 @@ def save_model(cpkt_dir, model, optimizer, loss, epoch, name):
     save_path = cpkt_dir
     make_dirs(save_path)
 
-    state = {'epoch': epoch,
+    state = {'epoch'     : epoch,
              'state_dict': model.state_dict(),
-             'optimizer': optimizer.state_dict(),
-             'loss': loss}
+             'optimizer' : optimizer.state_dict(),
+             'loss'      : loss}
     name = os.path.join(cpkt_dir, name + '_checkpoint.pth.tar')
     print(name)
     torch.save(state, name)
@@ -378,12 +383,45 @@ def reproducibility(config):
         torch.cuda.manual_seed(SEED)
 
 
+class Cosine_LR_Scheduler(object):
+    def __init__(self, optimizer, warmup_epochs, warmup_lr, num_epochs, base_lr, final_lr, iter_per_epoch,
+                 constant_predictor_lr=False):
+        self.base_lr = base_lr
+        self.constant_predictor_lr = constant_predictor_lr
+        warmup_iter = iter_per_epoch * warmup_epochs
+        warmup_lr_schedule = np.linspace(warmup_lr, base_lr, warmup_iter)
+        decay_iter = iter_per_epoch * (num_epochs - warmup_epochs)
+        cosine_lr_schedule = final_lr + 0.5 * (base_lr - final_lr) * (
+                1 + np.cos(np.pi * np.arange(decay_iter) / decay_iter))
+
+        self.lr_schedule = np.concatenate((warmup_lr_schedule, cosine_lr_schedule))
+        self.optimizer = optimizer
+        self.iter = 0
+        self.current_lr = 0
+
+    def step(self):
+        for param_group in self.optimizer.param_groups:
+
+            if self.constant_predictor_lr and param_group['name'] == 'predictor':
+                param_group['lr'] = self.base_lr
+            else:
+                lr = param_group['lr'] = self.lr_schedule[self.iter]
+
+        self.iter += 1
+        self.current_lr = lr
+        return lr
+
+    def get_lr(self):
+        return self.current_lr
+
+
 def select_optimizer(model, config, checkpoint=None):
     opt = config['optimizer']['type']
     lr = config['optimizer']['lr']
     if (opt == 'Adam'):
         print(" use optimizer Adam lr ", lr)
-        optimizer = optim.Adam(model.parameters(), lr=float(config['optimizer']['lr']), weight_decay=0.000001)
+        optimizer = optim.Adam(model.parameters(), lr=float(config['optimizer']['lr']),
+                               weight_decay=float(config['optimizer']['weight_decay']))
     elif (opt == 'SGD'):
         print(" use optimizer SGD lr ", lr)
         optimizer = optim.SGD(model.parameters(), lr=float(config['optimizer']['lr']), momentum=0.9,
@@ -410,10 +448,9 @@ def select_optimizer(model, config, checkpoint=None):
     return optimizer, None
 
 
-def select_model(config, n_classes,pretrained=True):
-
-    if config.model.name in ['resnet18', 'mobilenet_v2', 'densenet121', 'resneXt','efficientnet_b1']:
-        return CNN(n_classes, config.model.name,pretrained=pretrained)
+def select_model(config, n_classes, pretrained=True):
+    if config.model.name in ['resnet18', 'mobilenet_v2', 'densenet121', 'resneXt', 'efficientnet_b1']:
+        return CNN(n_classes, config.model.name, pretrained=pretrained)
     elif config.model.name == 'vit':
         return ViT(
             image_size=224,
