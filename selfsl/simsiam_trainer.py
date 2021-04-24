@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 from base.base_trainer import BaseTrainer
-from ssl.ssl_models.simsiam import knn_monitor
+from selfsl.ssl_models.simsiam import knn_monitor
 from utils.util import MetricTracker
 from utils.util import save_model
 

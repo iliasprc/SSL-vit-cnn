@@ -8,8 +8,8 @@ from torch.utils.tensorboard import SummaryWriter
 
 from data_loader.dataset_utils import ssl_dataset
 from logger.logger import Logger
-from ssl.simsiam_trainer import SimSiamTrainer
-from ssl.ssl_models.simsiam import SimSiam
+from selfsl.simsiam_trainer import SimSiamTrainer
+from selfsl.ssl_models.simsiam import SimSiam
 from utils.util import reproducibility, select_optimizer, load_checkpoint, get_arguments
 
 
