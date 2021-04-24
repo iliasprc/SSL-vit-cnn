@@ -148,6 +148,7 @@ def select_backbone(model, pretrained=False):
 def knn_monitor(net, val_data_loader, test_data_loader, epoch, logger, k=200, t=0.1):
     net.eval()
     classes = len(val_data_loader.dataset.classes)
+    print(classes)
     total_top1, total_top5, total_num, feature_bank = 0.0, 0.0, 0, []
     with torch.no_grad():
         # generate feature bank

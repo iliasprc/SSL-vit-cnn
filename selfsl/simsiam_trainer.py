@@ -70,8 +70,9 @@ class SimSiamTrainer(BaseTrainer):
             (loss / self.gradient_accumulation).backward()
             if (batch_idx % self.gradient_accumulation == 0):
                 self.optimizer.step()  # Now we can do an optimizer step
-                self.optimizer.zero_grad()  # Reset gradients tensors
-            # lr_scheduler.step()
+                  # Reset gradients tensors
+                self.lr_scheduler.step()
+                #s#elf.optimizer.zero_grad()
 
             # logger.update_scalers(data_dict)
 
@@ -98,7 +99,7 @@ class SimSiamTrainer(BaseTrainer):
             else:
                 self.logger.info(
                     f"{mode} Epoch: [{epoch:2d}/{self.epochs:2d}]\t Sample ["
-                    f"{batch_idx * self.config.batch_size:5d}/{self.len_epoch:5d}]\t {metrics_string}")
+                    f"{batch_idx * self.config.batch_size:5d}/{self.len_epoch:5d}]\t {metrics_string} LR {self.lr_scheduler.get_lr()}")
         elif print_summary:
             self.logger.info(
                 f'{mode} summary  Epoch: [{epoch}/{self.epochs}]\t {metrics_string}')

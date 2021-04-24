@@ -10,7 +10,7 @@ from data_loader.dataset_utils import ssl_dataset
 from logger.logger import Logger
 from selfsl.simsiam_trainer import SimSiamTrainer
 from selfsl.ssl_models.simsiam import SimSiam
-from utils.util import reproducibility, select_optimizer, load_checkpoint, get_arguments
+from utils.util import reproducibility, select_optimizer, load_checkpoint, get_arguments,Cosine_LR_Scheduler
 
 
 def main():
@@ -62,6 +62,7 @@ def main():
     log.info(f'device: {device}')
 
     training_generator, val_generator, test_generator, class_dict = ssl_dataset(config)
+    log.info(f'{len(training_generator)*256} {len(val_generator)} {len(test_generator)}')
     n_classes = len(class_dict)
     model = SimSiam(config.model.name)
 
@@ -84,6 +85,14 @@ def main():
     config.model.optimizer.lr = float(config.model.optimizer.lr) * float(config.batch_size) * float(
         config.gradient_accumulation) / 256.0
     optimizer, scheduler = select_optimizer(model, config['model'], None)
+    scheduler = Cosine_LR_Scheduler(
+        optimizer,
+        warmup_epochs=10, warmup_lr=0,
+        num_epochs=int(config.epochs), base_lr=config.model.optimizer.lr, final_lr=0,
+        iter_per_epoch=len(training_generator),
+        constant_predictor_lr=True # see the end of section 4.2 predictor
+    )
+
     log.info(f'{model}')
     log.info(f"Checkpoint Folder {cpkt_fol_name} ")
     shutil.copy(os.path.join(config.cwd, config_file), cpkt_fol_name)

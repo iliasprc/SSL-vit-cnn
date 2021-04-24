@@ -57,10 +57,11 @@ class SimSiamTransform():
 def ssl_dataset(config):
     root_dir = os.path.join(config.cwd, config.dataset.input_data)
     if config.dataset.name == 'CIFAR100':
-        train_transform = SimSiamTransform(32)
+        size = 224
+        train_transform = SimSiamTransform(size)
         # val_transform = SimSiamTransform(32)
         val_transform = transforms.Compose([
-            transforms.Resize(32),
+            transforms.Resize(size),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
@@ -96,14 +97,15 @@ def ssl_dataset(config):
             valid_dataset, **val_params, sampler=valid_sampler
         )
         fbank_loader = torch.utils.data.DataLoader(
-            valid_dataset, **val_params, sampler=train_sampler
+            feature_bank_dataset, **val_params, sampler=train_sampler
         )
         return train_loader,fbank_loader, valid_loader,  train_dataset.classes
     elif config.dataset.name == 'CIFAR10':
-        train_transform = SimSiamTransform(32)
+        size = 224
+        train_transform = SimSiamTransform(size)
         # val_transform = SimSiamTransform(32)
         val_transform = transforms.Compose([
-            transforms.Resize(32),
+            transforms.Resize(size),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
@@ -112,7 +114,7 @@ def ssl_dataset(config):
 
         feature_bank_dataset = torchvision.datasets.CIFAR10(root=root_dir, transform=val_transform, train=True,
                                                              download=True)
-        valid_dataset = torchvision.datasets.CIFAR10(root=root_dir, transform=val_transform, train=True,
+        valid_dataset = torchvision.datasets.CIFAR10(root=root_dir, transform=val_transform, train=False,
                                                       download=True)
         valid_size = 0.2
         num_train = len(train_dataset)
@@ -133,12 +135,36 @@ def ssl_dataset(config):
                         'num_workers': config.dataloader.train.num_workers,
                         'pin_memory' : False}
         train_loader = torch.utils.data.DataLoader(
-            train_dataset, **train_params, sampler=train_sampler
+            train_dataset, **train_params
         )
         valid_loader = torch.utils.data.DataLoader(
-            valid_dataset, **val_params, sampler=valid_sampler
+            valid_dataset, **val_params
         )
         fbank_loader = torch.utils.data.DataLoader(
-            valid_dataset, **val_params, sampler=train_sampler
+            feature_bank_dataset, **val_params
         )
         return train_loader, fbank_loader, valid_loader, train_dataset.classes
+
+
+def get_dataset(dataset, data_dir, transform, train=True, download=True, debug_subset_size=None):
+    if dataset == 'mnist':
+        dataset = torchvision.datasets.MNIST(data_dir, train=train, transform=transform, download=download)
+    elif dataset == 'stl10':
+        dataset = torchvision.datasets.STL10(data_dir, split='train+unlabeled' if train else 'test', transform=transform, download=download)
+    elif dataset == 'cifar10':
+        dataset = torchvision.datasets.CIFAR10(data_dir, train=train, transform=transform, download=download)
+    elif dataset == 'cifar100':
+        dataset = torchvision.datasets.CIFAR100(data_dir, train=train, transform=transform, download=download)
+    elif dataset == 'imagenet':
+        dataset = torchvision.datasets.ImageNet(data_dir, split='train' if train == True else 'val', transform=transform, download=download)
+    elif dataset == 'random':
+        dataset = RandomDataset()
+    else:
+        raise NotImplementedError
+
+    if debug_subset_size is not None:
+        dataset = torch.utils.data.Subset(dataset, range(0, debug_subset_size)) # take only one batch
+        dataset.classes = dataset.dataset.classes
+        dataset.targets = dataset.dataset.targets
+    print(dataset.classes)
+    return dataset
