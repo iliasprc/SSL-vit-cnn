@@ -167,6 +167,52 @@ def ssl_dataset(config):
             dataset, **val_params
         )
         return train_loader, fbank_loader, valid_loader, dataset.classes
+    elif config.dataset.name == 'STL10':
+
+        train_transform = SimSiamTransform(SIZE)
+        # val_transform = SimSiamTransform(32)
+        val_transform = transforms.Compose([
+            transforms.Resize(SIZE),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+        train_dataset = torchvision.datasets.STL10(root=root_dir, transform=train_transform, split='train+unlabeled',
+                                                   download=True)
+
+        val_dataset = torchvision.datasets.STL10(root=root_dir, transform=val_transform, split='train',
+                                                 download=True)
+        test_dataset = torchvision.datasets.STL10(root=root_dir, transform=val_transform, split='test',
+                                                  download=True)
+        # valid_size = 0.2
+        # num_train = len(train_dataset)
+        # indices = list(range(num_train))
+        # split = int(np.floor(valid_size * num_train))
+        #
+        # np.random.shuffle(indices)
+        #
+        # train_idx, valid_idx = indices[split:], indices[:split]
+        # train_sampler = SubsetRandomSampler(train_idx)
+        #
+        # valid_sampler = SubsetRandomSampler(valid_idx)
+        val_params = {'batch_size' : config.batch_size,
+                      'num_workers': config.dataloader.val.num_workers,
+                      'shuffle'    : False,
+                      'pin_memory' : False}
+
+        train_params = {'batch_size' : config.batch_size,
+                        'num_workers': config.dataloader.train.num_workers,
+                        'shuffle'    : True,
+                        'pin_memory' : False}
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, **train_params
+        )
+        valid_loader = torch.utils.data.DataLoader(
+            val_dataset, **val_params
+        )
+        test_loader = torch.utils.data.DataLoader(
+            test_dataset, **val_params
+        )
+        return train_loader, valid_loader, test_loader, train_dataset.classes
 
 
 def get_dataset(dataset, data_dir, transform, train=True, download=True, debug_subset_size=None):

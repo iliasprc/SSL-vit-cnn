@@ -1,15 +1,15 @@
 trainer:
   cwd: /home/ # working directory
   logger: CNNS # logger name
-  epochs: 500 # number of training epochs
+  epochs: 1000 # number of training epochs
   seed: 123 # randomness seed
   cuda: True # use nvidia gpu
   gpu: 0,1 # id of gpu
   shape: 32
   save: True # save checkpoint
   load: False # load pretrained checkpoint
-  gradient_accumulation: 4 # gradient accumulation steps
-  batch_size: 256
+  gradient_accumulation: 8 # gradient accumulation steps
+  batch_size: 32
   pretrained_cpkt: cpkt.pt
   log_interval: 10 # print statistics every log_interval
   model:
@@ -17,7 +17,7 @@ trainer:
     pretrained: False
     optimizer: # optimizer configuration
       type: SGD # optimizer type
-      lr: 0.1e-1 # learning rate
+      lr: 1e-2 # learning rate
       weight_decay: 0.0001 # weight decay
     scheduler: # learning rate scheduler
       type: ReduceLRonPlateau # type of scheduler
@@ -37,7 +37,7 @@ trainer:
       num_workers: 2
   dataset:
     input_data: data_dir
-    name: random # dataset name COVIDx or COVID_CT
+    name: STL10 # dataset name COVIDx or COVID_CT
     type: clf
     train:
       augmentation: True # do augmentation to video

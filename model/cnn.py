@@ -1,9 +1,9 @@
+import timm
 import torch.nn as nn
-import timm
 from torchvision import models
-import timm
 
 from model.mlp_head import MLPHead
+
 
 def cnn_select(num_classes, model='resnet50', pretrained=False):
     if (model == 'resnet50'):
@@ -25,6 +25,8 @@ def cnn_select(num_classes, model='resnet50', pretrained=False):
         cnn = timm.create_model('efficientnet_b1', pretrained=True, num_classes=num_classes)
 
     return cnn
+
+
 class CNN(nn.Module):
     def __init__(self, num_classes, model='resnet50', pretrained=False):
         super(CNN, self).__init__()
@@ -42,21 +44,25 @@ class CNN(nn.Module):
         elif (model == 'densenet121'):
             self.cnn = models.densenet121(pretrained=pretrained)
             self.cnn.classifier = nn.Linear(1024, num_classes)
-        elif model =='efficientnet_b1':
+        elif model == 'efficientnet_b1':
 
-            self.cnn  = timm.create_model('efficientnet_b1', pretrained=True,num_classes=num_classes)
-        self.cnn = nn.Sequential(*list(self.cnn.children()))
+            self.cnn = timm.create_model('efficientnet_b1', pretrained=True, num_classes=num_classes)
+        # self.cnn = nn.Sequential(*list(self.cnn.children()))
+        elif model == 'efficientnet_b0':
+
+            self.cnn = timm.create_model('efficientnet_b0', pretrained=True, num_classes=num_classes)
+
+            self.cnn.conv_stem = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
 
     def forward(self, x):
 
         return self.cnn(x)
 
 
-
 class ByolCNN(nn.Module):
     def __init__(self, **kwargs):
         super(ByolCNN, self).__init__()
-        pretrained =  kwargs['pretrained']
+        pretrained = kwargs['pretrained']
         model = kwargs['model']
         if (model == 'resnet50'):
             self.cnn = models.resnet50(pretrained=pretrained)
@@ -72,14 +78,14 @@ class ByolCNN(nn.Module):
 
         elif (model == 'densenet121'):
             self.cnn = models.densenet121(pretrained=pretrained)
-        elif model =='efficientnet_b0':
+        elif model == 'efficientnet_b0':
 
-            self.cnn  = timm.create_model('efficientnet_b0', pretrained=pretrained)
-        elif model =='efficientnet_b1':
+            self.cnn = timm.create_model('efficientnet_b0', pretrained=pretrained)
+        elif model == 'efficientnet_b1':
 
-            self.cnn  = timm.create_model('efficientnet_b1', pretrained=pretrained)
+            self.cnn = timm.create_model('efficientnet_b1', pretrained=pretrained)
         self.cnn = nn.Sequential(*list(self.cnn.children())[:-1])
-        self.projetion = MLPHead(in_channels=in_feats , **kwargs['projection_head'])
+        self.projetion = MLPHead(in_channels=in_feats, **kwargs['projection_head'])
 
     def forward(self, x):
 

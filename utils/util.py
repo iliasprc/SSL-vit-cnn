@@ -76,7 +76,7 @@ def load_checkpoint(checkpoint, model, strict=True, optimizer=None, load_seperat
     """
     checkpoint1 = torch.load(checkpoint, map_location='cpu')
     print(checkpoint1.keys())
-    pretrained_dict = checkpoint1['model_dict']
+    pretrained_dict = checkpoint1['state_dict']
     model_dict = model.state_dict()
     print(pretrained_dict.keys())
     print(model_dict.keys())
@@ -400,10 +400,10 @@ class Cosine_LR_Scheduler(object):
         self.current_lr = 0
 
     def step(self):
-        #print(self.optimizer.param_groups)
+        # print(self.optimizer.param_groups)
 
         for param_group in self.optimizer.param_groups:
-            #print(param_group['name'])
+            # print(param_group['name'])
             if self.constant_predictor_lr and param_group['name'] == 'predictor':
                 param_group['lr'] = self.base_lr
             else:
@@ -422,21 +422,21 @@ def select_optimizer(model, config, checkpoint=None):
     lr = config['optimizer']['lr']
     predictor_prefix = ('module.predictor', 'predictor')
     parameters = [{
-        'name': 'base',
+        'name'  : 'base',
         'params': [param for name, param in model.named_parameters() if not name.startswith(predictor_prefix)],
-        'lr': lr
-    },{
-        'name': 'predictor',
+        'lr'    : lr
+    }, {
+        'name'  : 'predictor',
         'params': [param for name, param in model.named_parameters() if name.startswith(predictor_prefix)],
-        'lr': lr
+        'lr'    : lr
     }]
     if (opt == 'Adam'):
         print(" use optimizer Adam lr ", lr)
-        optimizer = optim.Adam( parameters, lr=float(config['optimizer']['lr']),
+        optimizer = optim.Adam(parameters, lr=float(config['optimizer']['lr']),
                                weight_decay=float(config['optimizer']['weight_decay']))
     elif (opt == 'SGD'):
         print(" use optimizer SGD lr ", lr)
-        optimizer = optim.SGD( parameters, lr=float(config['optimizer']['lr']), momentum=0.9,
+        optimizer = optim.SGD(parameters, lr=float(config['optimizer']['lr']), momentum=0.9,
                               weight_decay=float(config['optimizer']['weight_decay']))
     elif (opt == 'RMSprop'):
         print(" use RMS  lr", lr)
@@ -449,12 +449,12 @@ def select_optimizer(model, config, checkpoint=None):
             g['lr'] = 0.005
         print(optimizer.state_dict()['state'].keys())
 
-    # if config['scheduler']['type'] == 'ReduceLRonPlateau':
-    #     from torch.optim.lr_scheduler import ReduceLROnPlateau
-    #     scheduler = ReduceLROnPlateau(optimizer, factor=config['scheduler']['scheduler_factor'],
-    #                                   patience=config['scheduler']['scheduler_patience'],
-    #                                   min_lr=config['scheduler']['scheduler_min_lr'],
-    #                                   verbose=config['scheduler']['scheduler_verbose'])
+        # if config['scheduler']['type'] == 'ReduceLRonPlateau':
+        #     from torch.optim.lr_scheduler import ReduceLROnPlateau
+        #     scheduler = ReduceLROnPlateau(optimizer, factor=config['scheduler']['scheduler_factor'],
+        #                                   patience=config['scheduler']['scheduler_patience'],
+        #                                   min_lr=config['scheduler']['scheduler_min_lr'],
+        #                                   verbose=config['scheduler']['scheduler_verbose'])
 
         return optimizer, None
 
@@ -462,7 +462,7 @@ def select_optimizer(model, config, checkpoint=None):
 
 
 def select_model(config, n_classes, pretrained=True):
-    if config.model.name in ['resnet18', 'mobilenet_v2', 'densenet121', 'resneXt', 'efficientnet_b1']:
+    if config.model.name:
         return CNN(n_classes, config.model.name, pretrained=pretrained)
     elif config.model.name == 'vit':
         return ViT(

@@ -89,7 +89,7 @@ class Trainer(BaseTrainer):
             self.train_metrics.update(key='loss', value=loss.item(), n=1, writer_step=writer_step)
             self.train_metrics.update(key='acc',
                                       value=np.sum(prediction[1].cpu().numpy() == target.squeeze(-1).cpu().numpy()),
-                                      n=target.SIZE(0), writer_step=writer_step)
+                                      n=target.size(0), writer_step=writer_step)
             for t, p in zip(target.cpu().view(-1), prediction[1].cpu().view(-1)):
                 self.confusion_matrix[t.long(), p.long()] += 1
             self._progress(batch_idx, epoch, metrics=self.train_metrics, mode='train')
@@ -123,12 +123,12 @@ class Trainer(BaseTrainer):
                 writer_step = (epoch - 1) * len(loader) + batch_idx
 
                 prediction = torch.max(output, 1)
-                acc = np.sum(prediction[1].cpu().numpy() == target.squeeze(-1).cpu().numpy()) / target.SIZE(0)
+                acc = np.sum(prediction[1].cpu().numpy() == target.squeeze(-1).cpu().numpy()) / target.size(0)
 
                 self.valid_metrics.update(key='loss', value=loss.item(), n=1, writer_step=writer_step)
                 self.valid_metrics.update(key='acc',
                                           value=np.sum(prediction[1].cpu().numpy() == target.squeeze(-1).cpu().numpy()),
-                                          n=target.SIZE(0), writer_step=writer_step)
+                                          n=target.size(0), writer_step=writer_step)
                 for t, p in zip(target.cpu().view(-1), prediction[1].cpu().view(-1)):
                     self.confusion_matrix[t.long(), p.long()] += 1
         self._progress(batch_idx, epoch, metrics=self.valid_metrics, mode=mode, print_summary=True)
@@ -150,10 +150,10 @@ class Trainer(BaseTrainer):
             make_dirs(self.checkpoint_dir)
 
             self.checkpointer(epoch, validation_loss)
-            self.lr_scheduler.step(validation_loss)
+            #self.lr_scheduler.step(validation_loss)
             if self.do_test:
-                self.logger.info(f"{'!' * 10}    VALIDATION   , {'!' * 10}")
-                self.predict(epoch)
+                self.logger.info(f"{'!' * 10}    TEST  , {'!' * 10}")
+                self._valid_epoch(epoch, 'test', self.test_data_loader)
 
     def predict(self, epoch):
         """

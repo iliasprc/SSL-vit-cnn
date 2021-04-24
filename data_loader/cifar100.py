@@ -6,7 +6,7 @@ import torchvision
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchvision import transforms
 
-size = 224
+size = 32
 train_transform = transforms.Compose([
     transforms.Resize(size),
     transforms.RandomResizedCrop((size), scale=(0.8, 1.2)),
@@ -19,7 +19,6 @@ val_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
-
 
 
 def cifar100(config):
@@ -38,18 +37,22 @@ def cifar100(config):
     train_idx, valid_idx = indices[split:], indices[:split]
     train_sampler = SubsetRandomSampler(train_idx)
     valid_sampler = SubsetRandomSampler(valid_idx)
-    val_params = {'batch_size': config.dataloader.val.batch_size,
+    val_params = {'batch_size' : config.dataloader.val.batch_size,
                   'num_workers': config.dataloader.val.num_workers,
-                  'pin_memory': False}
+                  'pin_memory' : False}
 
-    train_params = {'batch_size': config.dataloader.train.batch_size,
+    train_params = {'batch_size' : config.dataloader.train.batch_size,
                     'num_workers': config.dataloader.train.num_workers,
-                    'pin_memory': False}
+                    'pin_memory' : False}
     train_loader = torch.utils.data.DataLoader(
         train_dataset, **train_params, sampler=train_sampler
     )
     valid_loader = torch.utils.data.DataLoader(
         valid_dataset, **val_params, sampler=valid_sampler
     )
-
-    return train_loader, valid_loader, None, train_dataset.classes
+    test_dataset = torchvision.datasets.CIFAR100(root=root_dir, transform=val_transform, train=False,
+                                                  download=True)
+    test_loader = torch.utils.data.DataLoader(
+        test_dataset, **val_params
+    )
+    return train_loader, valid_loader, test_loader, train_dataset.classes

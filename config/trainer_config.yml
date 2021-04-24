@@ -1,18 +1,18 @@
 trainer:
   cwd: /home/ # working directory
   logger: CNNS # logger name
-  epochs: 30 # number of training epochs
+  epochs: 100 # number of training epochs
   seed: 123 # randomness seed
   cuda: True # use nvidia gpu
   gpu: 0,1 # id of gpu
   save: True # save checkpoint
-  load: False # load pretrained checkpoint
-  gradient_accumulation: 16 # gradient accumulation steps
-  pretrained_cpkt: cpkt.pt
+  load: True # load pretrained checkpoint
+  gradient_accumulation: 2 # gradient accumulation steps
+  pretrained_cpkt: /home/iliask/PycharmProjects/CNNs/checkpoints/dataset_random/model_efficientnet_b0/date_24_04_2021_18.54.44/_backbone_last_checkpoint.pth.tar
   log_interval: 10000 # print statistics every log_interval
   model:
-    name: efficientnet_b1 # model name  [mobilenet_v2,COVIDNet_small]
-    pretrained: True
+    name: efficientnet_b0 # model name  [mobilenet_v2,COVIDNet_small]
+    pretrained: False
     optimizer: # optimizer configuration
       type: SGD # optimizer type
       lr: 1e-2 # learning rate
@@ -25,11 +25,11 @@ trainer:
       scheduler_verbose: 5e-6 # print if learning rate is changed
   dataloader:
     train:
-      batch_size: 16 # batch size
+      batch_size: 256 # batch size
       shuffle: True # shuffle samples after every epoch
       num_workers: 6 # number of thread for dataloader1
     val:
-      batch_size: 16
+      batch_size: 512
       shuffle: False
       num_workers: 2
     test:

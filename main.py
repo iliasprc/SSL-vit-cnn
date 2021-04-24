@@ -28,7 +28,8 @@ def main():
     reproducibility(config)
     dt_string = now.strftime("%d_%m_%Y_%H.%M.%S")
     cpkt_fol_name = os.path.join(config.cwd,
-                                 f'checkpoints/dataset_{config.dataset.name}/model_{config.model.name}/date_{dt_string}')
+                                 f'checkpoints/dataset_{config.dataset.name}/model_{config.model.name}/date_'
+                                 f'{dt_string}')
 
     log = Logger(path=cpkt_fol_name, name='LOG').get_logger()
 
@@ -44,7 +45,8 @@ def main():
     if args.tensorboard:
 
         # writer_path = os.path.join(config.save,
-        #                            'checkpoints/model_' + config.model.name + '/dataset_' + config.dataset.name + '/date_' + dt_string + '/runs/')
+        #                            'checkpoints/model_' + config.model.name + '/dataset_' + config.dataset.name +
+        #                            '/date_' + dt_string + '/runs/')
 
         writer = SummaryWriter(cpkt_fol_name + '/runs/')
     else:
@@ -63,7 +65,7 @@ def main():
 
     if (config.load):
 
-        pth_file, _ = load_checkpoint(config.pretrained_cpkt, model, strict=True, load_seperate_layers=False)
+        pth_file, _ = load_checkpoint(config.pretrained_cpkt, model.cnn, strict=False, load_seperate_layers=False)
 
 
 
