@@ -154,6 +154,10 @@ def select_backbone(config, model, pretrained=False):
         cnn = timm.create_model('efficientnet_b1', pretrained=pretrained)
         in_feats = 1280
     # cnn = nn.Sequential(*list(cnn.children())[:-1])  # do not return classifier
+    elif model == 'vit':
+        cnn = timm.create_model('vit_base_patch16_224', pretrained=pretrained)
+        in_feats = 768
+        cnn.head = nn.Identity()
     return cnn, in_feats
 
 
@@ -196,7 +200,7 @@ def knn_predict(feature, feature_bank, feature_labels, classes, knn_k, knn_t):
     # [B, K]
     sim_weight, sim_indices = sim_matrix.topk(k=knn_k, dim=-1)
     # [B, K]
-    sim_labels = torch.gather(feature_labels.expand(feature.size(0), -1), dim=-1, index=sim_indices)
+    sim_labels = torch.gather(feature_labels.expand(feature.size(0), -1), dim=-1, index=sim_indices).long()
     sim_weight = (sim_weight / knn_t).exp()
 
     # counts for each class

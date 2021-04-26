@@ -8,12 +8,12 @@ trainer:
   shape: 224
   save: True # save checkpoint
   load: False # load pretrained checkpoint
-  gradient_accumulation: 16 # gradient accumulation steps
-  batch_size: 32
+  gradient_accumulation: 32 # gradient accumulation steps
+  batch_size: 16
   pretrained_cpkt: cpkt.pt
   log_interval: 10000 # print statistics every log_interval
   model:
-    name: efficientnet_b0 # model name  [mobilenet_v2,COVIDNet_small]
+    name: vit # model name  [mobilenet_v2,COVIDNet_small]
     pretrained: False
     optimizer: # optimizer configuration
       type: SGD # optimizer type
