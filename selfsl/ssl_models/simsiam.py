@@ -30,6 +30,7 @@ class projection_MLP(nn.Module):
         put fc. Its output fc has no ReLU. The hidden fc is 2048-d. 
         This MLP has 3 layers.
         '''
+
         self.layer1 = nn.Sequential(
             nn.Linear(in_dim, hidden_dim),
             nn.BatchNorm1d(hidden_dim),
@@ -74,6 +75,8 @@ class prediction_MLP(nn.Module):
         and h’s hidden layer’s dimension is 512, making h a 
         bottleneck structure (ablation in supplement). 
         '''
+        hidden_dim = in_dim // 4
+
         self.layer1 = nn.Sequential(
             nn.Linear(in_dim, hidden_dim),
             nn.BatchNorm1d(hidden_dim),
@@ -97,19 +100,21 @@ class SimSiam(nn.Module):
     def __init__(self, config, backbone=None):
         super().__init__()
 
-        self.backbone, in_feats = select_backbone(config,backbone, pretrained=False)
-        self.projector = projection_MLP(in_feats)
+        self.backbone, in_feats = select_backbone(config, backbone, pretrained=False)
+        out_dim = 1024
+        self.projector = projection_MLP(in_feats, hidden_dim=out_dim, out_dim=out_dim)
 
         self.encoder = nn.Sequential(  # f encoder
             self.backbone,
             self.projector
         )
-        self.predictor = prediction_MLP()
+        self.predictor = prediction_MLP(out_dim, hidden_dim=out_dim // 4, out_dim=out_dim)
 
     def forward(self, x1, x2):
         f, h = self.encoder, self.predictor
         # print(x1.shape,x2.shape)
         z1, z2 = f(x1), f(x2)
+        # print(z1.shape)
         p1, p2 = h(z1), h(z2)
         L = D(p1, z2) / 2 + D(p2, z1) / 2
         return L
@@ -155,8 +160,17 @@ def select_backbone(config, model, pretrained=False):
         in_feats = 1280
     # cnn = nn.Sequential(*list(cnn.children())[:-1])  # do not return classifier
     elif model == 'vit':
-        cnn = timm.create_model('vit_base_patch16_224', pretrained=pretrained)
-        in_feats = 768
+        patch_size = 8
+        if shape == 32:
+            patch_size = 4
+            embed_dim = 512
+        else:
+            patch_size = 8
+            embed_dim = 512
+        cnn = timm.create_model('vit_small_patch16_224', pretrained=pretrained, img_size=shape, patch_size=patch_size,
+                                embed_dim=embed_dim)
+        in_feats = embed_dim
+
         cnn.head = nn.Identity()
     return cnn, in_feats
 
@@ -175,7 +189,7 @@ def knn_monitor(net, val_data_loader, test_data_loader, epoch, logger, k=200, t=
         # [D, N]
         feature_bank = torch.cat(feature_bank, dim=0).t().contiguous()
         # [N]
-        feature_labels = torch.tensor(val_data_loader.dataset.labels, device=feature_bank.device)
+        feature_labels = torch.tensor(val_data_loader.dataset.targets, device=feature_bank.device)
         # loop test data to predict the label by weighted knn search
 
         if test_data_loader is not None:

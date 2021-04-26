@@ -5,11 +5,11 @@ trainer:
   seed: 123 # randomness seed
   cuda: True # use nvidia gpu
   gpu: 0,1 # id of gpu
-  shape: 224
+  shape: 32
   save: True # save checkpoint
   load: False # load pretrained checkpoint
-  gradient_accumulation: 32 # gradient accumulation steps
-  batch_size: 16
+  gradient_accumulation: 4 # gradient accumulation steps
+  batch_size: 256
   pretrained_cpkt: cpkt.pt
   log_interval: 10000 # print statistics every log_interval
   model:
@@ -37,7 +37,7 @@ trainer:
       num_workers: 2
   dataset:
     input_data: data_dir
-    name: STL10 # dataset name COVIDx or COVID_CT
+    name: CIFAR100 # dataset name COVIDx or COVID_CT
     type: clf
     train:
       augmentation: True # do augmentation to video
