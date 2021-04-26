@@ -189,7 +189,7 @@ def knn_monitor(net, val_data_loader, test_data_loader, epoch, logger, k=200, t=
         # [D, N]
         feature_bank = torch.cat(feature_bank, dim=0).t().contiguous()
         # [N]
-        feature_labels = torch.tensor(val_data_loader.dataset.targets, device=feature_bank.device)
+        feature_labels = torch.tensor(val_data_loader.dataset.labels, device=feature_bank.device)
         # loop test data to predict the label by weighted knn search
 
         if test_data_loader is not None:
