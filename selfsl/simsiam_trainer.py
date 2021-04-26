@@ -19,7 +19,7 @@ class SimSiamTrainer(BaseTrainer):
             self.device = torch.device("cuda" if use_cuda else "cpu")
         else:
             self.device = torch.device("cpu")
-        self.start_epoch = 1
+        self.start_epoch = 0
         self.train_data_loader = data_loader
 
         self.len_epoch = self.config.batch_size * len(self.train_data_loader)

@@ -179,7 +179,7 @@ def ssl_dataset(config):
         train_dataset = torchvision.datasets.STL10(root=root_dir, transform=train_transform, split='train+unlabeled',
                                                    download=True)
 
-        val_dataset = torchvision.datasets.STL10(root=root_dir, transform=val_transform, split='train',
+        val_dataset = torchvision.datasets.STL10(root=root_dir, transform=train_transform, split='train',
                                                  download=True)
         test_dataset = torchvision.datasets.STL10(root=root_dir, transform=val_transform, split='test',
                                                   download=True)
