@@ -115,7 +115,7 @@ def ssl_dataset(config):
         train_dataset = torchvision.datasets.CIFAR10(root=root_dir, transform=train_transform, train=True,
                                                      download=True)
 
-        feature_bank_dataset = torchvision.datasets.CIFAR10(root=root_dir, transform=val_transform, train=True,
+        feature_bank_dataset = torchvision.datasets.CIFAR10(root=root_dir, transform=train_transform, train=True,
                                                             download=True)
         valid_dataset = torchvision.datasets.CIFAR10(root=root_dir, transform=val_transform, train=False,
                                                      download=True)

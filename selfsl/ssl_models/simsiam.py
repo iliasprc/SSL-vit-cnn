@@ -184,6 +184,27 @@ def select_backbone(config, model, pretrained=False):
         in_feats = embed_dim
         #
         # cnn.head = nn.Identity()
+    elif model == 'deit':
+        from vit_pytorch.distill import DistillableViT, DistillWrapper
+        patch_size = 8
+        if shape == 32:
+            patch_size = 4
+            embed_dim = 512
+        else:
+            patch_size = 8
+            embed_dim = 512
+        cnn = DistillableViT(
+            image_size=shape,
+            patch_size=patch_size,
+            num_classes=1000,
+            dim=192,
+            depth=8,
+            heads=8,
+            mlp_dim=512,
+            dropout=0.1,
+            emb_dropout=0.1)
+        cnn.head = nn.Identity()
+        in_feats = 192
     return cnn, in_feats
 
 
@@ -201,7 +222,7 @@ def knn_monitor(net, val_data_loader, test_data_loader, epoch, logger, k=200, t=
         # [D, N]
         feature_bank = torch.cat(feature_bank, dim=0).t().contiguous()
         # [N]
-        feature_labels = torch.tensor(val_data_loader.dataset.labels, device=feature_bank.device)
+        feature_labels = torch.tensor(val_data_loader.dataset.targets, device=feature_bank.device)
         # loop test data to predict the label by weighted knn search
 
         if test_data_loader is not None:
@@ -238,3 +259,21 @@ def knn_predict(feature, feature_bank, feature_labels, classes, knn_k, knn_t):
 
     pred_labels = pred_scores.argsort(dim=-1, descending=True)
     return pred_labels
+
+
+from vit_pytorch.distill import DistillableViT, DistillWrapper
+
+v = DistillableViT(
+    image_size=96,
+    patch_size=8,
+    num_classes=1000,
+    dim=192,
+    depth=8,
+    heads=8,
+    mlp_dim=768,
+    dropout=0.1,
+    emb_dropout=0.1)
+
+from torchsummary import summary
+summary(v,(3,96,96),device='cpu')
+print(v)
