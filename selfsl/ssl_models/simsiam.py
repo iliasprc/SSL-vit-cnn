@@ -162,7 +162,7 @@ def select_backbone(config, model, pretrained=False):
     elif model == 'vit':
         patch_size = 8
         if shape == 32:
-            patch_size = 4
+            patch_size = 2
             embed_dim = 512
         else:
             patch_size = 8
@@ -172,11 +172,11 @@ def select_backbone(config, model, pretrained=False):
             patch_size = patch_size,
             num_classes = 1000,
             dim = embed_dim,
-            depth = 3,
-            heads = 8,
-            mlp_dim = embed_dim,
-            dropout = 0.2,
-            emb_dropout = 0.2
+            depth = 6,
+            heads = 12,
+            mlp_dim = 2*embed_dim,
+            dropout = 0.1,
+            emb_dropout = 0.1
         )
         cnn.mlp_head = nn.Identity()
         # cnn = timm.create_model('vit_small_patch16_224', pretrained=pretrained, img_size=shape, patch_size=patch_size,
@@ -203,8 +203,15 @@ def select_backbone(config, model, pretrained=False):
             mlp_dim=512,
             dropout=0.1,
             emb_dropout=0.1)
-        cnn.head = nn.Identity()
+        cnn.mlp_head = nn.Identity()
         in_feats = 192
+    elif model =='t2tvit':
+        from model.t2tvit.t2t_vit import T2t_vit_7
+        cnn = T2t_vit_7(img_size=shape)
+        cnn.head = nn.Identity()
+        in_feats = 256
+    #     from model.t2tvit.t2t_vit import *
+    #     m = T2t_vit_7(img_size=96)
     return cnn, in_feats
 
 
@@ -222,7 +229,7 @@ def knn_monitor(net, val_data_loader, test_data_loader, epoch, logger, k=200, t=
         # [D, N]
         feature_bank = torch.cat(feature_bank, dim=0).t().contiguous()
         # [N]
-        feature_labels = torch.tensor(val_data_loader.dataset.targets, device=feature_bank.device)
+        feature_labels = torch.tensor(val_data_loader.dataset.labels, device=feature_bank.device)
         # loop test data to predict the label by weighted knn search
 
         if test_data_loader is not None:
@@ -261,19 +268,25 @@ def knn_predict(feature, feature_bank, feature_labels, classes, knn_k, knn_t):
     return pred_labels
 
 
-from vit_pytorch.distill import DistillableViT, DistillWrapper
-
-v = DistillableViT(
-    image_size=96,
-    patch_size=8,
-    num_classes=1000,
-    dim=192,
-    depth=8,
-    heads=8,
-    mlp_dim=768,
-    dropout=0.1,
-    emb_dropout=0.1)
-
-from torchsummary import summary
-summary(v,(3,96,96),device='cpu')
-print(v)
+# from vit_pytorch.distill import DistillableViT, DistillWrapper
+#
+# v = DistillableViT(
+#     image_size=96,
+#     patch_size=8,
+#     num_classes=1000,
+#     dim=192,
+#     depth=8,
+#     heads=8,
+#     mlp_dim=768,
+#     dropout=0.1,
+#     emb_dropout=0.1)
+#
+# from torchsummary import summary
+# summary(v,(3,96,96),device='cpu')
+# print(v)
+# #
+# from model.t2tvit.t2t_vit import *
+# m = T2t_vit_7(img_size=96)
+# print(m)
+# # from torchsummary import summary
+# # summary(m,(3,96,96),device='cpu')

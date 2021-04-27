@@ -29,7 +29,7 @@ def main():
     config = OmegaConf.load(os.path.join(cwd, config_file))['trainer']
     config.cwd = str(cwd)
     reproducibility(config)
-
+    os.environ['CUDA_VISIBLE_DEVICES'] = str(config.gpu)
     dt_string = now.strftime("%d_%m_%Y_%H.%M.%S")
     cpkt_fol_name = os.path.join(config.cwd,
                                  f'checkpoints/dataset_{config.dataset.name}/model_{config.model.name}/date_'
@@ -87,9 +87,10 @@ def main():
     optimizer, scheduler = select_optimizer(model, config['model'], None)
     scheduler = Cosine_LR_Scheduler(
         optimizer,
-        warmup_epochs=1, warmup_lr=0,
+        warmup_epochs=5, warmup_lr=0,
         num_epochs=int(config.epochs), base_lr=config.model.optimizer.lr, final_lr=0,
-        iter_per_epoch=len(training_generator),
+        iter_per_epoch=len(training_generator)// int(
+        config.gradient_accumulation),
         constant_predictor_lr=True # see the end of section 4.2 predictor
     )
 

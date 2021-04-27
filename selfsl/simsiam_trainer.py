@@ -72,7 +72,7 @@ class SimSiamTrainer(BaseTrainer):
             if (batch_idx % self.gradient_accumulation == 0):
                 self.optimizer.step()  # Now we can do an optimizer step
                   # Reset gradients tensors
-            self.lr_scheduler.step()
+                self.lr_scheduler.step()
                 #s#elf.optimizer.zero_grad()
 
             # logger.update_scalers(data_dict)
