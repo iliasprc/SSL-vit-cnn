@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import models
-
+from model.vit import ViT
 
 def D(p, z, version='simplified'):  # negative cosine similarity
     if version == 'original':
@@ -167,11 +167,23 @@ def select_backbone(config, model, pretrained=False):
         else:
             patch_size = 8
             embed_dim = 512
-        cnn = timm.create_model('vit_small_patch16_224', pretrained=pretrained, img_size=shape, patch_size=patch_size,
-                                embed_dim=embed_dim)
+        cnn =  ViT(
+            image_size = shape,
+            patch_size = patch_size,
+            num_classes = 1000,
+            dim = embed_dim,
+            depth = 3,
+            heads = 8,
+            mlp_dim = embed_dim,
+            dropout = 0.2,
+            emb_dropout = 0.2
+        )
+        cnn.mlp_head = nn.Identity()
+        # cnn = timm.create_model('vit_small_patch16_224', pretrained=pretrained, img_size=shape, patch_size=patch_size,
+        #                         embed_dim=embed_dim)
         in_feats = embed_dim
-
-        cnn.head = nn.Identity()
+        #
+        # cnn.head = nn.Identity()
     return cnn, in_feats
 
 

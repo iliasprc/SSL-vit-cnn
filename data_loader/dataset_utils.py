@@ -70,9 +70,9 @@ def ssl_dataset(config):
         train_dataset = torchvision.datasets.CIFAR100(root=root_dir, transform=train_transform, train=True,
                                                       download=True)
 
-        feature_bank_dataset = torchvision.datasets.CIFAR100(root=root_dir, transform=val_transform, train=True,
+        feature_bank_dataset = torchvision.datasets.CIFAR100(root=root_dir, transform=train_transform, train=True,
                                                              download=True)
-        valid_dataset = torchvision.datasets.CIFAR100(root=root_dir, transform=val_transform, train=True,
+        valid_dataset = torchvision.datasets.CIFAR100(root=root_dir, transform=val_transform, train=False,
                                                       download=True)
         valid_size = 0.2
         num_train = len(train_dataset)
@@ -80,26 +80,27 @@ def ssl_dataset(config):
         split = int(np.floor(valid_size * num_train))
 
         np.random.shuffle(indices)
-
-        train_idx, valid_idx = indices[split:], indices[:split]
-        train_sampler = SubsetRandomSampler(train_idx)
-
-        valid_sampler = SubsetRandomSampler(valid_idx)
+        #
+        # train_idx, valid_idx = indices[split:], indices[:split]
+        # train_sampler = SubsetRandomSampler(train_idx)
+        #
+        # valid_sampler = SubsetRandomSampler(valid_idx)
         val_params = {'batch_size' : config.batch_size,
                       'num_workers': config.dataloader.val.num_workers,
                       'pin_memory' : False}
 
         train_params = {'batch_size' : config.batch_size,
                         'num_workers': config.dataloader.train.num_workers,
+                        'shuffle':True,
                         'pin_memory' : False}
         train_loader = torch.utils.data.DataLoader(
-            train_dataset, **train_params, sampler=train_sampler
+            train_dataset, **train_params
         )
         valid_loader = torch.utils.data.DataLoader(
-            valid_dataset, **val_params, sampler=valid_sampler
+            valid_dataset, **val_params
         )
         fbank_loader = torch.utils.data.DataLoader(
-            feature_bank_dataset, **val_params, sampler=train_sampler
+            feature_bank_dataset, **val_params
         )
         return train_loader, fbank_loader, valid_loader, train_dataset.classes
     elif config.dataset.name == 'CIFAR10':
