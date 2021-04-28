@@ -184,6 +184,10 @@ def select_backbone(config, model, pretrained=False):
         in_feats = embed_dim
         #
         cnn.head = nn.Identity()
+    elif model =='pit':
+        cnn = timm.create_model('pit_ti_224', pretrained=pretrained)
+        cnn.head = nn.Identity()
+        in_feats = 256
     elif model == 'deit':
         patch_size = 8
         if shape == 32:
@@ -192,7 +196,7 @@ def select_backbone(config, model, pretrained=False):
         else:
             patch_size = 16
             embed_dim = 512
-        cnn = timm.create_model('vit_deit_tiny_patch16_224')
+        cnn = timm.create_model('vit_deit_tiny_patch16_224',pretrained=pretrained)
         cnn.head = nn.Identity()
         # cnn = DistillableViT(
         #     image_size=shape,
