@@ -128,15 +128,16 @@ def ssl_dataset(config):
         np.random.shuffle(indices)
 
         train_idx, valid_idx = indices[split:], indices[:split]
-        train_sampler = SubsetRandomSampler(train_idx)
-
-        valid_sampler = SubsetRandomSampler(valid_idx)
+        # train_sampler = SubsetRandomSampler(train_idx)
+        #
+        # valid_sampler = SubsetRandomSampler(valid_idx)
         val_params = {'batch_size' : config.batch_size,
                       'num_workers': config.dataloader.val.num_workers,
                       'pin_memory' : False}
 
         train_params = {'batch_size' : config.batch_size,
                         'num_workers': config.dataloader.train.num_workers,
+                        'shuffle':True,
                         'pin_memory' : False}
         train_loader = torch.utils.data.DataLoader(
             train_dataset, **train_params
