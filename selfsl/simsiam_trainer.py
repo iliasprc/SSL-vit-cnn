@@ -71,9 +71,9 @@ class SimSiamTrainer(BaseTrainer):
             (loss / self.gradient_accumulation).backward()
             if (batch_idx % self.gradient_accumulation == 0):
                 self.optimizer.step()  # Now we can do an optimizer step
-                  # Reset gradients tensors
+                # Reset gradients tensors
             self.lr_scheduler.step()
-                #s#elf.optimizer.zero_grad()
+            # s#elf.optimizer.zero_grad()
 
             # logger.update_scalers(data_dict)
 
@@ -81,9 +81,9 @@ class SimSiamTrainer(BaseTrainer):
 
             self.train_metrics.update(key='loss', value=loss.item(), n=1, writer_step=writer_step)
             self._progress(batch_idx, epoch, metrics=self.train_metrics, mode='train')
-        if  epoch%10==0:
+        if epoch % 10 == 0:
             accuracy = knn_monitor(self.model.backbone, val_data_loader=self.valid_data_loader,
-                                   test_data_loader=self.test_data_loader, epoch= epoch,logger= self.logger
+                                   test_data_loader=self.test_data_loader, epoch=epoch, logger=self.logger
                                    )
         self._progress(batch_idx, epoch, metrics=self.train_metrics, mode='train', print_summary=True)
 
@@ -93,6 +93,7 @@ class SimSiamTrainer(BaseTrainer):
                    f'_model_last')
         save_model(self.checkpoint_dir, self.model.backbone, self.optimizer, self.train_metrics.avg('loss'), epoch,
                    f'_backbone_last')
+
     def _progress(self, batch_idx, epoch, metrics, mode='', print_summary=False):
         metrics_string = metrics.calc_all_metrics()
         if ((batch_idx * self.config.batch_size) % self.log_step == 0):
@@ -102,7 +103,8 @@ class SimSiamTrainer(BaseTrainer):
             else:
                 self.logger.info(
                     f"{mode} Epoch: [{epoch:2d}/{self.epochs:2d}]\t Sample ["
-                    f"{batch_idx * self.config.batch_size:5d}/{self.len_epoch:5d}]\t {metrics_string} LR {self.lr_scheduler.get_lr()}")
+                    f"{batch_idx * self.config.batch_size:5d}/{self.len_epoch:5d}]\t {metrics_string} LR "
+                    f"{self.lr_scheduler.get_lr()}")
         elif print_summary:
             self.logger.info(
                 f'{mode} summary  Epoch: [{epoch}/{self.epochs}]\t {metrics_string}')

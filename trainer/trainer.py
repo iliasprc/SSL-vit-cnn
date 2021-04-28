@@ -142,7 +142,7 @@ class Trainer(BaseTrainer):
         Train the model
         """
         for epoch in range(self.start_epoch, self.epochs):
-            #torch.manual_seed(self.config.seed)
+            # torch.manual_seed(self.config.seed)
             self._train_epoch(epoch)
 
             self.logger.info(f"{'!' * 10}    VALIDATION   , {'!' * 10}")
@@ -150,7 +150,7 @@ class Trainer(BaseTrainer):
             make_dirs(self.checkpoint_dir)
 
             self.checkpointer(epoch, validation_loss)
-            #self.lr_scheduler.step(validation_loss)
+            # self.lr_scheduler.step(validation_loss)
             if self.do_test:
                 self.logger.info(f"{'!' * 10}    TEST  , {'!' * 10}")
                 self._valid_epoch(epoch, 'test', self.test_data_loader)
@@ -206,7 +206,8 @@ class Trainer(BaseTrainer):
                 self.logger.warning(f" No metrics")
             else:
                 self.logger.info(
-                    f"{mode} Epoch: [{epoch:2d}/{self.epochs:2d}]\t Sample [{batch_idx * self.config.dataloader.train.batch_size:5d}/{self.len_epoch:5d}]\t {metrics_string}")
+                    f"{mode} Epoch: [{epoch:2d}/{self.epochs:2d}]\t Sample ["
+                    f"{batch_idx * self.config.dataloader.train.batch_size:5d}/{self.len_epoch:5d}]\t {metrics_string}")
         elif print_summary:
             self.logger.info(
                 f'{mode} summary  Epoch: [{epoch}/{self.epochs}]\t {metrics_string}')

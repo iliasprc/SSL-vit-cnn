@@ -89,7 +89,7 @@ def main():
         optimizer,
         warmup_epochs=1, warmup_lr=0,
         num_epochs=int(config.epochs), base_lr=config.model.optimizer.lr, final_lr=0,
-        iter_per_epoch=len(training_generator),
+        iter_per_epoch=len(training_generator)//int(config.gradient_accumulation),
         constant_predictor_lr=True # see the end of section 4.2 predictor
     )
 

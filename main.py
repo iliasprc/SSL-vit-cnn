@@ -59,7 +59,7 @@ def main():
 
     training_generator, val_generator, test_generator, class_dict = select_dataset(config)
     n_classes = len(class_dict)
-    model = select_model(config, n_classes)
+    model = select_model(config, n_classes, pretrained=False)
 
     log.info(f"{model}")
 
@@ -89,7 +89,6 @@ def main():
                       lr_scheduler=scheduler,
                       checkpoint_dir=cpkt_fol_name)
     trainer.train()
-
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import models
-from model.vit import ViT
+
 
 def D(p, z, version='simplified'):  # negative cosine similarity
     if version == 'original':
@@ -165,45 +165,46 @@ def select_backbone(config, model, pretrained=False):
             patch_size = 4
             embed_dim = 512
         else:
-            patch_size = 8
-            embed_dim = 512
-        cnn =  ViT(
-            image_size = shape,
-            patch_size = patch_size,
-            num_classes = 1000,
-            dim = embed_dim,
-            depth = 3,
-            heads = 8,
-            mlp_dim = embed_dim,
-            dropout = 0.2,
-            emb_dropout = 0.2
-        )
-        cnn.mlp_head = nn.Identity()
-        # cnn = timm.create_model('vit_small_patch16_224', pretrained=pretrained, img_size=shape, patch_size=patch_size,
-        #                         embed_dim=embed_dim)
+            patch_size = 16
+            embed_dim = 768
+        # cnn =  ViT(
+        #     image_size = shape,
+        #     patch_size = patch_size,
+        #     num_classes = 1000,
+        #     dim = embed_dim,
+        #     depth = 3,
+        #     heads = 8,
+        #     mlp_dim = 2*embed_dim,
+        #     dropout = 0.2,
+        #     emb_dropout = 0.2
+        # )
+        # cnn.mlp_head = nn.Identity()
+        cnn = timm.create_model('vit_small_patch16_224', pretrained=pretrained, img_size=shape, patch_size=patch_size,
+                                embed_dim=embed_dim)
         in_feats = embed_dim
         #
-        # cnn.head = nn.Identity()
+        cnn.head = nn.Identity()
     elif model == 'deit':
-        from vit_pytorch.distill import DistillableViT, DistillWrapper
         patch_size = 8
         if shape == 32:
             patch_size = 4
             embed_dim = 512
         else:
-            patch_size = 8
+            patch_size = 16
             embed_dim = 512
-        cnn = DistillableViT(
-            image_size=shape,
-            patch_size=patch_size,
-            num_classes=1000,
-            dim=192,
-            depth=8,
-            heads=8,
-            mlp_dim=512,
-            dropout=0.1,
-            emb_dropout=0.1)
+        cnn = timm.create_model('vit_deit_tiny_patch16_224')
         cnn.head = nn.Identity()
+        # cnn = DistillableViT(
+        #     image_size=shape,
+        #     patch_size=patch_size,
+        #     num_classes=1000,
+        #     dim=192,
+        #     depth=8,
+        #     heads=8,
+        #     mlp_dim=512,
+        #     dropout=0.1,
+        #     emb_dropout=0.1)
+        # cnn.mlp_head = nn.Identity()
         in_feats = 192
     return cnn, in_feats
 
@@ -222,7 +223,7 @@ def knn_monitor(net, val_data_loader, test_data_loader, epoch, logger, k=200, t=
         # [D, N]
         feature_bank = torch.cat(feature_bank, dim=0).t().contiguous()
         # [N]
-        feature_labels = torch.tensor(val_data_loader.dataset.targets, device=feature_bank.device)
+        feature_labels = torch.tensor(val_data_loader.dataset.labels, device=feature_bank.device)
         # loop test data to predict the label by weighted knn search
 
         if test_data_loader is not None:
@@ -260,20 +261,19 @@ def knn_predict(feature, feature_bank, feature_labels, classes, knn_k, knn_t):
     pred_labels = pred_scores.argsort(dim=-1, descending=True)
     return pred_labels
 
+# from vit_pytorch.distill import DistillableViT, DistillWrapper
+#
+# v = DistillableViT(
+#     image_size=96,
+#     patch_size=8,
+#     num_classes=1000,
+#     dim=192,
+#     depth=8,
+#     heads=8,
+#     mlp_dim=768,
+#     dropout=0.1,
+#     emb_dropout=0.1)
 
-from vit_pytorch.distill import DistillableViT, DistillWrapper
-
-v = DistillableViT(
-    image_size=96,
-    patch_size=8,
-    num_classes=1000,
-    dim=192,
-    depth=8,
-    heads=8,
-    mlp_dim=768,
-    dropout=0.1,
-    emb_dropout=0.1)
-
-from torchsummary import summary
-summary(v,(3,96,96),device='cpu')
-print(v)
+# from torchsummary import summary
+# summary(v,(3,96,96),device='cpu')
+# print(v)

@@ -9,4 +9,5 @@ tensorboard
 omegaconf
 byol-pytorch
 einops
-timm
+git+https://github.com/rwightman/pytorch-image-models.git
+vit-pytorch
