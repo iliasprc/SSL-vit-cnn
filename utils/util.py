@@ -497,7 +497,7 @@ def select_optimizer_pretrain(model, config, checkpoint=None):
     return optimizer, None
 
 
-def select_model(config, n_classes, pretrained=True):
+def select_model(config, n_classes, pretrained=False):
     if config.model.name:
         return CNN(n_classes, config.model.name, pretrained=pretrained)
     elif config.model.name == 'vit':

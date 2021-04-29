@@ -5,7 +5,7 @@ import torch
 import torchvision
 from torch.utils.data.sampler import SubsetRandomSampler
 
-from data_loader.cifar import cifar100,cifar10,stl10
+from data_loader.cifar import cifar100,cifar10
 from data_loader.random_dataset import RandomDataset
 
 
@@ -26,8 +26,6 @@ def select_dataset(config):
         return cifar100(config)
     elif config.dataset.name == 'CIFAR10':
         return cifar10(config)
-    elif config.dataset.name =='STL10':
-        return stl10(config)
 
 import torchvision.transforms as transforms
 
