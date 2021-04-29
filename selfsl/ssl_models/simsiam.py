@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import models
-from model.vit import ViT
+
 
 def D(p, z, version='simplified'):  # negative cosine similarity
     if version == 'original':
@@ -150,8 +150,8 @@ def select_backbone(config, model, pretrained=False):
     elif model == 'efficientnet_b0':
 
         cnn = timm.create_model('efficientnet_b0', pretrained=pretrained)
-        if shape == 32:
-            cnn.conv_stem = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
+        # if shape == 32:
+        #     cnn.conv_stem = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
         cnn.classifier = nn.Identity()
         in_feats = 1280
     elif model == 'efficientnet_b1':
@@ -159,21 +159,25 @@ def select_backbone(config, model, pretrained=False):
         cnn = timm.create_model('efficientnet_b1', pretrained=pretrained)
         in_feats = 1280
     # cnn = nn.Sequential(*list(cnn.children())[:-1])  # do not return classifier
+    elif model =='t2tvit':
+        from model.t2tvit.t2t_vit import T2t_vit_7
+        cnn = T2t_vit_7
     elif model == 'vit':
         patch_size = 8
-        if shape == 32:
-            patch_size = 2
+        if False:#shape == 32:
+            patch_size = 4
             embed_dim = 512
         else:
-            patch_size = 8
-            embed_dim = 512
+            patch_size = 16
+            embed_dim = 768
+        from vit_pytorch import ViT
         cnn =  ViT(
             image_size = shape,
             patch_size = patch_size,
             num_classes = 1000,
             dim = embed_dim,
-            depth = 6,
-            heads = 12,
+            depth = 2,
+            heads = 8,
             mlp_dim = 2*embed_dim,
             dropout = 0.1,
             emb_dropout = 0.1
@@ -183,35 +187,33 @@ def select_backbone(config, model, pretrained=False):
         #                         embed_dim=embed_dim)
         in_feats = embed_dim
         #
-        # cnn.head = nn.Identity()
+        cnn.head = nn.Identity()
+    elif model =='pit':
+        cnn = timm.create_model('pit_ti_224', pretrained=pretrained)
+        cnn.head = nn.Identity()
+        in_feats = 256
     elif model == 'deit':
-        from vit_pytorch.distill import DistillableViT, DistillWrapper
         patch_size = 8
         if shape == 32:
             patch_size = 4
             embed_dim = 512
         else:
-            patch_size = 8
+            patch_size = 16
             embed_dim = 512
-        cnn = DistillableViT(
-            image_size=shape,
-            patch_size=patch_size,
-            num_classes=1000,
-            dim=192,
-            depth=8,
-            heads=8,
-            mlp_dim=512,
-            dropout=0.1,
-            emb_dropout=0.1)
-        cnn.mlp_head = nn.Identity()
-        in_feats = 192
-    elif model =='t2tvit':
-        from model.t2tvit.t2t_vit import T2t_vit_7
-        cnn = T2t_vit_7(img_size=shape)
+        cnn = timm.create_model('vit_deit_tiny_patch16_224',pretrained=pretrained)
         cnn.head = nn.Identity()
-        in_feats = 256
-    #     from model.t2tvit.t2t_vit import *
-    #     m = T2t_vit_7(img_size=96)
+        # cnn = DistillableViT(
+        #     image_size=shape,
+        #     patch_size=patch_size,
+        #     num_classes=1000,
+        #     dim=192,
+        #     depth=8,
+        #     heads=8,
+        #     mlp_dim=512,
+        #     dropout=0.1,
+        #     emb_dropout=0.1)
+        # cnn.mlp_head = nn.Identity()
+        in_feats = 192
     return cnn, in_feats
 
 
@@ -267,7 +269,6 @@ def knn_predict(feature, feature_bank, feature_labels, classes, knn_k, knn_t):
     pred_labels = pred_scores.argsort(dim=-1, descending=True)
     return pred_labels
 
-
 # from vit_pytorch.distill import DistillableViT, DistillWrapper
 #
 # v = DistillableViT(
@@ -280,13 +281,7 @@ def knn_predict(feature, feature_bank, feature_labels, classes, knn_k, knn_t):
 #     mlp_dim=768,
 #     dropout=0.1,
 #     emb_dropout=0.1)
-#
+
 # from torchsummary import summary
 # summary(v,(3,96,96),device='cpu')
 # print(v)
-# #
-# from model.t2tvit.t2t_vit import *
-# m = T2t_vit_7(img_size=96)
-# print(m)
-# # from torchsummary import summary
-# # summary(m,(3,96,96),device='cpu')

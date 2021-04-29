@@ -421,6 +421,42 @@ def select_optimizer(model, config, checkpoint=None):
     opt = config['optimizer']['type']
     lr = config['optimizer']['lr']
     predictor_prefix = ('module.predictor', 'predictor')
+
+    if (opt == 'Adam'):
+        print(" use optimizer Adam lr ", lr)
+        optimizer = optim.Adam(model.parameters(), lr=float(config['optimizer']['lr']),
+                               weight_decay=float(config['optimizer']['weight_decay']))
+    elif (opt == 'SGD'):
+        print(" use optimizer SGD lr ", lr)
+        optimizer = optim.SGD(model.parameters(), lr=float(config['optimizer']['lr']), momentum=0.9,
+                              weight_decay=float(config['optimizer']['weight_decay']))
+    elif (opt == 'RMSprop'):
+        print(" use RMS  lr", lr)
+        optimizer = optim.RMSprop(model.parameters(), lr=float(config['optimizer']['lr']),
+                                  weight_decay=float(config['optimizer']['weight_decay']))
+    if (checkpoint != None):
+        # print('load opt cpkt')
+        optimizer.load_state_dict(checkpoint['optimizer_dict'])
+        for g in optimizer.param_groups:
+            g['lr'] = 0.005
+        print(optimizer.state_dict()['state'].keys())
+
+    if config['scheduler']['type'] == 'ReduceLRonPlateau':
+        from torch.optim.lr_scheduler import ReduceLROnPlateau
+        scheduler = ReduceLROnPlateau(optimizer, factor=config['scheduler']['scheduler_factor'],
+                                      patience=config['scheduler']['scheduler_patience'],
+                                      min_lr=config['scheduler']['scheduler_min_lr'],
+                                      verbose=config['scheduler']['scheduler_verbose'])
+
+        return optimizer, scheduler
+
+    return optimizer, None
+
+
+def select_optimizer_pretrain(model, config, checkpoint=None):
+    opt = config['optimizer']['type']
+    lr = config['optimizer']['lr']
+    predictor_prefix = ('module.predictor', 'predictor')
     parameters = [{
         'name'  : 'base',
         'params': [param for name, param in model.named_parameters() if not name.startswith(predictor_prefix)],
@@ -449,14 +485,14 @@ def select_optimizer(model, config, checkpoint=None):
             g['lr'] = 0.005
         print(optimizer.state_dict()['state'].keys())
 
-        # if config['scheduler']['type'] == 'ReduceLRonPlateau':
-        #     from torch.optim.lr_scheduler import ReduceLROnPlateau
-        #     scheduler = ReduceLROnPlateau(optimizer, factor=config['scheduler']['scheduler_factor'],
-        #                                   patience=config['scheduler']['scheduler_patience'],
-        #                                   min_lr=config['scheduler']['scheduler_min_lr'],
-        #                                   verbose=config['scheduler']['scheduler_verbose'])
+    if config['scheduler']['type'] == 'ReduceLRonPlateau':
+        from torch.optim.lr_scheduler import ReduceLROnPlateau
+        scheduler = ReduceLROnPlateau(optimizer, factor=config['scheduler']['scheduler_factor'],
+                                      patience=config['scheduler']['scheduler_patience'],
+                                      min_lr=config['scheduler']['scheduler_min_lr'],
+                                      verbose=config['scheduler']['scheduler_verbose'])
 
-        return optimizer, None
+        return optimizer, scheduler
 
     return optimizer, None
 

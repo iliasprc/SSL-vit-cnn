@@ -59,9 +59,9 @@ def main():
 
     training_generator, val_generator, test_generator, class_dict = select_dataset(config)
     n_classes = len(class_dict)
-    model = select_model(config, n_classes)
-
-    log.info(f"{model}")
+    model = select_model(config, n_classes,pretrained=config.model.pretrained)
+    log.info(f" train {len(training_generator)}  val {len(val_generator)}")
+    #log.info(f"{model}")
 
     if (config.load):
 
@@ -79,7 +79,7 @@ def main():
     model.to(device)
 
     optimizer, scheduler = select_optimizer(model, config['model'], None)
-    log.info(f'{model}')
+    #log.info(f'{model}')
     log.info(f"Checkpoint Folder {cpkt_fol_name} ")
     shutil.copy(os.path.join(config.cwd, config_file), cpkt_fol_name)
 

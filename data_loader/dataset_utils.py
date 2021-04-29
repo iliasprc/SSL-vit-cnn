@@ -5,26 +5,29 @@ import torch
 import torchvision
 from torch.utils.data.sampler import SubsetRandomSampler
 
-from data_loader.cifar100 import cifar100
+from data_loader.cifar import cifar100,cifar10,stl10
 from data_loader.random_dataset import RandomDataset
 
 
 def select_dataset(config):
-    test_params = {'batch_size' : config.dataloader.test.batch_size,
+    test_params = {'batch_size' : config.batch_size,
                    'shuffle'    : False,
                    'num_workers': 2}
-    val_params = {'batch_size' : config.dataloader.val.batch_size,
-                  'shuffle'    : config.dataloader.val.shuffle,
+    val_params = {'batch_size' : config.batch_size,
+                  'shuffle'    : False,
                   'num_workers': config.dataloader.val.num_workers,
                   'pin_memory' : True}
 
-    train_params = {'batch_size' : config.dataloader.train.batch_size,
+    train_params = {'batch_size' : config.batch_size,
                     'shuffle'    : config.dataloader.train.shuffle,
                     'num_workers': config.dataloader.train.num_workers,
                     'pin_memory' : True}
     if config.dataset.name == 'CIFAR100':
         return cifar100(config)
-
+    elif config.dataset.name == 'CIFAR10':
+        return cifar10(config)
+    elif config.dataset.name =='STL10':
+        return stl10(config)
 
 import torchvision.transforms as transforms
 

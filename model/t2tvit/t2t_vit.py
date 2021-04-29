@@ -6,16 +6,17 @@
 """
 T2T-ViT
 """
+import numpy as np
 import torch
 import torch.nn as nn
-
 from timm.models.helpers import load_pretrained
-from timm.models.registry import register_model
 from timm.models.layers import trunc_normal_
-import numpy as np
-from .token_transformer import Token_transformer
+from timm.models.registry import register_model
+
 from .token_performer import Token_performer
+from .token_transformer import Token_transformer
 from .transformer_block import Block, get_sinusoid_encoding
+
 
 def _cfg(url='', **kwargs):
     return {

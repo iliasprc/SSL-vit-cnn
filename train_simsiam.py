@@ -10,7 +10,7 @@ from data_loader.dataset_utils import ssl_dataset
 from logger.logger import Logger
 from selfsl.simsiam_trainer import SimSiamTrainer
 from selfsl.ssl_models.simsiam import SimSiam
-from utils.util import reproducibility, select_optimizer, load_checkpoint, get_arguments,Cosine_LR_Scheduler
+from utils.util import reproducibility, load_checkpoint, get_arguments,Cosine_LR_Scheduler,select_optimizer_pretrain
 
 
 def main():
@@ -29,7 +29,7 @@ def main():
     config = OmegaConf.load(os.path.join(cwd, config_file))['trainer']
     config.cwd = str(cwd)
     reproducibility(config)
-    os.environ['CUDA_VISIBLE_DEVICES'] = str(config.gpu)
+
     dt_string = now.strftime("%d_%m_%Y_%H.%M.%S")
     cpkt_fol_name = os.path.join(config.cwd,
                                  f'checkpoints/dataset_{config.dataset.name}/model_{config.model.name}/date_'
@@ -84,13 +84,12 @@ def main():
     model.to(device)
     config.model.optimizer.lr = float(config.model.optimizer.lr) * float(config.batch_size) * float(
         config.gradient_accumulation) / 256.0
-    optimizer, scheduler = select_optimizer(model, config['model'], None)
+    optimizer, scheduler = select_optimizer_pretrain(model, config['model'], None)
     scheduler = Cosine_LR_Scheduler(
         optimizer,
         warmup_epochs=5, warmup_lr=0,
         num_epochs=int(config.epochs), base_lr=config.model.optimizer.lr, final_lr=0,
-        iter_per_epoch=len(training_generator)// int(
-        config.gradient_accumulation),
+        iter_per_epoch=len(training_generator)//int(config.gradient_accumulation),
         constant_predictor_lr=True # see the end of section 4.2 predictor
     )
 

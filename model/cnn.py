@@ -30,7 +30,12 @@ def cnn_select(num_classes, model='resnet50', pretrained=False):
 class CNN(nn.Module):
     def __init__(self, num_classes, model='resnet50', pretrained=False):
         super(CNN, self).__init__()
-        if (model == 'resnet50'):
+        if (model == 'resnet18'):
+            print('\n',pretrained,'\n')
+            self.cnn = models.resnet18(pretrained=pretrained)
+            #self.cnn.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+            self.cnn.fc = nn.Linear(512, num_classes)
+        elif (model == 'resnet50'):
             self.cnn = models.resnet50(pretrained=pretrained)
             self.cnn.fc = nn.Linear(2048, num_classes)
         elif (model == 'resnext50_32x4d'):
@@ -53,7 +58,9 @@ class CNN(nn.Module):
             self.cnn = timm.create_model('efficientnet_b0', pretrained=True, num_classes=num_classes)
 
             self.cnn.conv_stem = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
-
+        elif model =='t2tvit':
+            from model.t2tvit.t2t_vit import T2t_vit_7
+            self.cnn = T2t_vit_7(num_classes=num_classes,pretrained=pretrained)
     def forward(self, x):
 
         return self.cnn(x)

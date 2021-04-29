@@ -4,21 +4,21 @@ trainer:
   epochs: 1000 # number of training epochs
   seed: 123 # randomness seed
   cuda: True # use nvidia gpu
-  gpu: 1 # id of gpu
-  shape: 96
+  gpu: 0 # id of gpu
+  shape: 224
   save: True # save checkpoint
   load: False # load pretrained checkpoint
-  gradient_accumulation: 2 # gradient accumulation steps
-  batch_size: 512
+  gradient_accumulation: 20 # gradient accumulation steps
+  batch_size: 50
   pretrained_cpkt: cpkt.pt
-  log_interval: 1000 # print statistics every log_interval
+  log_interval: 10000 # print statistics every log_interval
   model:
-    name: t2tvit # model name  [mobilenet_v2,COVIDNet_small]
+    name: efficientnet_b0 # model name  [mobilenet_v2,COVIDNet_small]
     pretrained: False
     optimizer: # optimizer configuration
-      type: SGD # optimizer type
-      lr: 1e-1 # learning rate
-      weight_decay: 0.0001 # weight decay
+      type: Adam # optimizer type
+      lr: 5e-4 # learning rate
+      weight_decay: 0.00001 # weight decay
     scheduler: # learning rate scheduler
       type: ReduceLRonPlateau # type of scheduler
       scheduler_factor: 0.5 # learning rate change ratio
@@ -28,7 +28,7 @@ trainer:
   dataloader:
     train:
       shuffle: True # shuffle samples after every epoch
-      num_workers: 6 # number of thread for dataloader1
+      num_workers: 4 # number of thread for dataloader1
     val:
       shuffle: False
       num_workers: 2
