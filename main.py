@@ -6,7 +6,7 @@ import torch
 from omegaconf import OmegaConf
 from torch.utils.tensorboard import SummaryWriter
 
-from data_loader.dataset_utils import select_dataset
+from data_loader.datasets import select_cf_dataset
 from logger.logger import Logger
 from trainer.trainer import Trainer
 from utils.util import reproducibility, select_model, select_optimizer, load_checkpoint, get_arguments
@@ -57,7 +57,7 @@ def main():
     device = torch.device("cuda:0" if use_cuda else "cpu")
     log.info(f'device: {device}')
 
-    training_generator, val_generator, test_generator, class_dict = select_dataset(config)
+    training_generator, val_generator, test_generator, class_dict = select_cf_dataset(config)
     n_classes = len(class_dict)
     model = select_model(config, n_classes, pretrained=False)
 
