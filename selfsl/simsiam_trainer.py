@@ -63,7 +63,7 @@ class SimSiamTrainer(BaseTrainer):
             # print(images1[0].shape,images2[0].shape,labels.shape)
             # print('1\n',images1[0],'\n 2 \n',images2[0])
 
-            self.model.zero_grad()
+            #self.model.zero_grad()
             loss = self.model.forward(images1.to(self.device, non_blocking=True),
                                       images2.to(self.device, non_blocking=True))
             loss = loss.mean()  # ddp
@@ -72,7 +72,8 @@ class SimSiamTrainer(BaseTrainer):
             if (batch_idx % self.gradient_accumulation == 0):
                 self.optimizer.step()  # Now we can do an optimizer step
                 # Reset gradients tensors
-            self.lr_scheduler.step()
+                self.lr_scheduler.step()
+                self.optimizer.zero_grad()
             # s#elf.optimizer.zero_grad()
 
             # logger.update_scalers(data_dict)

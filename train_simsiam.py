@@ -87,7 +87,7 @@ def main():
     optimizer, scheduler = select_optimizer_pretrain(model, config['model'], None)
     scheduler = Cosine_LR_Scheduler(
         optimizer,
-        warmup_epochs=1, warmup_lr=0,
+        warmup_epochs=5, warmup_lr=0,
         num_epochs=int(config.epochs), base_lr=config.model.optimizer.lr, final_lr=0,
         iter_per_epoch=len(training_generator)//int(config.gradient_accumulation),
         constant_predictor_lr=True # see the end of section 4.2 predictor
