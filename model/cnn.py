@@ -54,10 +54,30 @@ class CNN(nn.Module):
         # self.cnn = nn.Sequential(*list(self.cnn.children()))
         elif model == 'efficientnet_b0':
 
-            self.cnn = timm.create_model('efficientnet_b0', pretrained=True, num_classes=num_classes)
+            self.cnn = timm.create_model('efficientnet_b0', pretrained=pretrained, num_classes=num_classes)
 
-            self.cnn.conv_stem = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
+            #self.cnn.conv_stem = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
+        elif model == 'vit':
+            patch_size = 8
 
+            patch_size = 16
+            embed_dim = 768
+            # cnn =  ViT(
+            #     image_size = shape,
+            #     patch_size = patch_size,
+            #     num_classes = 1000,
+            #     dim = embed_dim,
+            #     depth = 3,
+            #     heads = 8,
+            #     mlp_dim = 2*embed_dim,
+            #     dropout = 0.2,
+            #     emb_dropout = 0.2
+            # )
+            # cnn.mlp_head = nn.Identity()
+            self.cnn = timm.create_model('vit_small_patch16_224', pretrained=pretrained, img_size=224,num_classes=num_classes)
+            in_feats = embed_dim
+            #
+            #self.cnn.head = nn.Identity()
     def forward(self, x):
 
         return self.cnn(x)

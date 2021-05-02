@@ -90,8 +90,8 @@ class Trainer(BaseTrainer):
             self.train_metrics.update(key='acc',
                                       value=np.sum(prediction[1].cpu().numpy() == target.squeeze(-1).cpu().numpy()),
                                       n=target.size(0), writer_step=writer_step)
-            for t, p in zip(target.cpu().view(-1), prediction[1].cpu().view(-1)):
-                self.confusion_matrix[t.long(), p.long()] += 1
+            # for t, p in zip(target.cpu().view(-1), prediction[1].cpu().view(-1)):
+            #     self.confusion_matrix[t.long(), p.long()] += 1
             self._progress(batch_idx, epoch, metrics=self.train_metrics, mode='train')
 
         self._progress(batch_idx, epoch, metrics=self.train_metrics, mode='train', print_summary=True)

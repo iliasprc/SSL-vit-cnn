@@ -4,19 +4,20 @@ trainer:
   epochs: 100 # number of training epochs
   seed: 123 # randomness seed
   cuda: True # use nvidia gpu
-  gpu: 0,1 # id of gpu
+  gpu: 0 # id of gpu
   save: True # save checkpoint
-  batch_size: 128
-  load: False # load pretrained checkpoint
-  gradient_accumulation: 16 # gradient accumulation steps
-  pretrained_cpkt: /home/iliask/PycharmProjects/CNNs/checkpoints/dataset_random/model_resnet18/date_27_04_2021_19.03.55/_backbone_last_checkpoint.pth.tar
+  batch_size: 64
+  shape: 224
+  load: True # load pretrained checkpoint
+  gradient_accumulation: 1 # gradient accumulation steps
+  pretrained_cpkt: /home/papastrat/PycharmProjects/CNNs/checkpoints/dataset_STL10/model_vit/date_30_04_2021_16.54.13/_backbone_last_checkpoint.pth.tar
   log_interval: 10000 # print statistics every log_interval
   model:
-    name: resnet18 # model name  [mobilenet_v2,COVIDNet_small]
+    name: vit # model name  [mobilenet_v2,COVIDNet_small]
     pretrained: False
     optimizer: # optimizer configuration
-      type: SGD # optimizer type
-      lr: 1e-2 # learning rate
+      type: Adam # optimizer type
+      lr: 1e-4 # learning rate
       weight_decay: 0.000001 # weight decay
     scheduler: # learning rate scheduler
       type: ReduceLRonPlateau # type of scheduler
@@ -39,7 +40,7 @@ trainer:
       num_workers: 2
   dataset:
     input_data: data_dir
-    name: CIFAR10 # dataset name COVIDx or COVID_CT
+    name: STL10 # dataset name COVIDx or COVID_CT
     type: clf
     train:
       augmentation: True # do augmentation to video

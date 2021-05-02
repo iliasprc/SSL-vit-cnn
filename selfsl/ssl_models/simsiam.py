@@ -179,8 +179,7 @@ def select_backbone(config, model, pretrained=False):
         #     emb_dropout = 0.2
         # )
         # cnn.mlp_head = nn.Identity()
-        cnn = timm.create_model('vit_small_patch16_224', pretrained=pretrained, img_size=shape, patch_size=patch_size,
-                                embed_dim=embed_dim)
+        cnn = timm.create_model('vit_small_patch16_224', pretrained=pretrained, img_size=shape)
         in_feats = embed_dim
         #
         cnn.head = nn.Identity()

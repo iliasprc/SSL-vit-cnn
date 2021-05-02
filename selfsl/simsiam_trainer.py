@@ -82,10 +82,10 @@ class SimSiamTrainer(BaseTrainer):
 
             self.train_metrics.update(key='loss', value=loss.item(), n=1, writer_step=writer_step)
             self._progress(batch_idx, epoch, metrics=self.train_metrics, mode='train')
-        if epoch % 10 == 0:
-            accuracy = knn_monitor(self.model.backbone, val_data_loader=self.valid_data_loader,
-                                   test_data_loader=self.test_data_loader, epoch=epoch, logger=self.logger
-                                   )
+        # if epoch % 10 == 0:
+        #     accuracy = knn_monitor(self.model.backbone, val_data_loader=self.valid_data_loader,
+        #                            test_data_loader=self.test_data_loader, epoch=epoch, logger=self.logger
+        #                            )
         self._progress(batch_idx, epoch, metrics=self.train_metrics, mode='train', print_summary=True)
 
     def checkpointer(self, epoch):

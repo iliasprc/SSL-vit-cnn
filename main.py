@@ -61,7 +61,7 @@ def main():
     n_classes = len(class_dict)
     model = select_model(config, n_classes, pretrained=False)
 
-    log.info(f"{model}")
+    #log.info(f"{model}")
 
     if (config.load):
 

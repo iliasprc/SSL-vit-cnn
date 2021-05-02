@@ -62,11 +62,12 @@ def main():
     log.info(f'device: {device}')
 
     training_generator, val_generator, test_generator, class_dict = ssl_dataset(config)
+    print(class_dict)
     log.info(f'{len(training_generator)*256} {len(val_generator)} {len(test_generator)}')
     n_classes = len(class_dict)
     model = SimSiam(config,config.model.name)
 
-    log.info(f"{model}")
+    #log.info(f"{model}")
 
     if (config.load):
 
@@ -93,7 +94,7 @@ def main():
         constant_predictor_lr=True # see the end of section 4.2 predictor
     )
 
-    log.info(f'{model}')
+    #log.info(f'{model}')
     log.info(f"Checkpoint Folder {cpkt_fol_name} ")
     shutil.copy(os.path.join(config.cwd, config_file), cpkt_fol_name)
     log.info(f"Optimizer {config['model']['optimizer']['type']} LR {config['model']['optimizer']['lr']}")
