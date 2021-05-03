@@ -59,7 +59,7 @@ def main():
 
     training_generator, val_generator, test_generator, class_dict = select_cf_dataset(config)
     n_classes = len(class_dict)
-    model = select_model(config, n_classes, pretrained=False)
+    model = select_model(config, n_classes, pretrained=True)
 
     #log.info(f"{model}")
 
