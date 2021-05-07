@@ -1,9 +1,9 @@
 import os
 
-import numpy as np
 import torch
 
 from base.base_trainer import BaseTrainer
+from utils.metrics import *
 from utils.util import MetricTracker
 from utils.util import write_csv, save_model, make_dirs
 
@@ -58,12 +58,12 @@ class Trainer(BaseTrainer):
     def _train_epoch(self, epoch):
         """
         Training logic for an epoch
-
         Args:
             epoch (int): current training epoch.
         """
 
         self.model.train()
+        y, yhat, yhat_raw, hids, losses = [], [], [], [], []
         self.confusion_matrix = 0 * self.confusion_matrix
         self.train_metrics.reset()
         gradient_accumulation = self.gradient_accumulation
@@ -74,7 +74,7 @@ class Trainer(BaseTrainer):
             target = target.to(self.device)
 
             output = self.model(data)
-            #print(target)
+
             loss = self.criterion(output, target.float())
             loss = loss.mean()
 
@@ -87,31 +87,37 @@ class Trainer(BaseTrainer):
 
             writer_step = (epoch - 1) * self.len_epoch + batch_idx
 
+            output = torch.sigmoid(output)
+            yhat_raw.append(output.detach().cpu().numpy())
+            output = np.round(output.detach().cpu().numpy())
+            y.append(target.detach().cpu().numpy())
+            yhat.append(output)
             self.train_metrics.update(key='loss', value=loss.item(), n=1, writer_step=writer_step)
-            self.train_metrics.update(key='acc',
-                                      value=np.sum(prediction[1].cpu().numpy() == target.squeeze(-1).cpu().numpy()),
-                                      n=target.size(0), writer_step=writer_step)
-            # for t, p in zip(target.cpu().view(-1), prediction[1].cpu().view(-1)):
-            #     self.confusion_matrix[t.long(), p.long()] += 1
             self._progress(batch_idx, epoch, metrics=self.train_metrics, mode='train')
+            # metrics = all_metrics(np.concatenate(yhat, axis=0),np.concatenate(y, axis=0), 5, np.concatenate(yhat_raw, axis=0))
+            # print_metrics(metrics)
+
+        k = 5
+        metrics = all_metrics(np.concatenate(yhat, axis=0), np.concatenate(y, axis=0), 5,
+                              np.concatenate(yhat_raw, axis=0))
+        print_metrics(metrics, self.logger)
+        # metrics = all_metrics(yhat, y, k=k, yhat_raw=yhat_raw)
 
         self._progress(batch_idx, epoch, metrics=self.train_metrics, mode='train', print_summary=True)
 
     def _valid_epoch(self, epoch, mode, loader):
         """
-
         Args:
             epoch (int): current epoch
             mode (string): 'validation' or 'test'
             loader (dataloader):
-
         Returns: validation loss
-
         """
+        y, yhat, yhat_raw, hids, losses = [], [], [], [], []
         self.model.eval()
         self.valid_sentences = []
         self.valid_metrics.reset()
-        self.confusion_matrix = 0 * self.confusion_matrix
+
         with torch.no_grad():
             for batch_idx, (data, target) in enumerate(loader):
                 data = data.to(self.device)
@@ -119,21 +125,33 @@ class Trainer(BaseTrainer):
                 target = target.to(self.device)
 
                 output = self.model(data)
-                loss = self.criterion(output, target)
+                loss = self.criterion(output, target.float())
                 loss = loss.mean()
                 writer_step = (epoch - 1) * len(loader) + batch_idx
 
                 prediction = torch.max(output, 1)
-                acc = np.sum(prediction[1].cpu().numpy() == target.squeeze(-1).cpu().numpy()) / target.size(0)
-
+                output = torch.sigmoid(output)
+                yhat_raw.append(output.detach().cpu().numpy())
+                output = np.round(output.detach().cpu().numpy())
+                y.append(target.detach().cpu().numpy())
+                yhat.append(output)
                 self.valid_metrics.update(key='loss', value=loss.item(), n=1, writer_step=writer_step)
-                self.valid_metrics.update(key='acc',
-                                          value=np.sum(prediction[1].cpu().numpy() == target.squeeze(-1).cpu().numpy()),
-                                          n=target.size(0), writer_step=writer_step)
-                for t, p in zip(target.cpu().view(-1), prediction[1].cpu().view(-1)):
-                    self.confusion_matrix[t.long(), p.long()] += 1
+                # self.valid_metrics.update(key='acc',
+                #                           value=np.sum(prediction[1].cpu().numpy() == target.squeeze(-1).cpu().numpy()),
+                #                           n=target.size(0), writer_step=writer_step)
+
+            # metrics = all_metrics(np.concatenate(yhat, axis=0),np.concatenate(y, axis=0), 5, np.concatenate(yhat_raw, axis=0))
+            # print_metrics(metrics)
+
+        k = 5
+        metrics = all_metrics(np.concatenate(yhat, axis=0), np.concatenate(y, axis=0), 5,
+                              np.concatenate(yhat_raw, axis=0))
+        print_metrics(metrics, self.logger)
         self._progress(batch_idx, epoch, metrics=self.valid_metrics, mode=mode, print_summary=True)
 
+        # s = sensitivity(self.confusion_matrix.numpy())
+        # ppv = positive_predictive_value(self.confusion_matrix.numpy())
+        # print(f" s {s} ,ppv {ppv}")
         val_loss = self.valid_metrics.avg('loss')
 
         return val_loss
@@ -143,7 +161,7 @@ class Trainer(BaseTrainer):
         Train the model
         """
         for epoch in range(self.start_epoch, self.epochs):
-            # torch.manual_seed(self.config.seed)
+            torch.manual_seed(self.config.seed)
             self._train_epoch(epoch)
 
             self.logger.info(f"{'!' * 10}    VALIDATION   , {'!' * 10}")
@@ -151,19 +169,17 @@ class Trainer(BaseTrainer):
             make_dirs(self.checkpoint_dir)
 
             self.checkpointer(epoch, validation_loss)
-            # self.lr_scheduler.step(validation_loss)
-            if self.do_test:
-                self.logger.info(f"{'!' * 10}    TEST  , {'!' * 10}")
-                self._valid_epoch(epoch, 'test', self.test_data_loader)
+            self.lr_scheduler.step(validation_loss)
+            # if self.do_test:
+            #     self.logger.info(f"{'!' * 10}    VALIDATION   , {'!' * 10}")
+            #     self.predict(epoch)
 
     def predict(self, epoch):
         """
         Inference
         Args:
             epoch ():
-
         Returns:
-
         """
         self.model.eval()
 
@@ -172,7 +188,7 @@ class Trainer(BaseTrainer):
             for batch_idx, (data, target) in enumerate(self.test_data_loader):
                 data = data.to(self.device)
 
-                logits = self.model(data, None)
+                logits = self.model(data)
 
                 maxes, prediction = torch.max(logits, 1)  # get the index of the max log-probability
                 # log.info()
@@ -207,8 +223,7 @@ class Trainer(BaseTrainer):
                 self.logger.warning(f" No metrics")
             else:
                 self.logger.info(
-                    f"{mode} Epoch: [{epoch:2d}/{self.epochs:2d}]\t Sample ["
-                    f"{batch_idx * self.config.batch_size:5d}/{self.len_epoch:5d}]\t {metrics_string}")
+                    f"{mode} Epoch: [{epoch:2d}/{self.epochs:2d}]\t Sample [{batch_idx * self.config.batch_size:5d}/{self.len_epoch:5d}]\t {metrics_string}")
         elif print_summary:
             self.logger.info(
                 f'{mode} summary  Epoch: [{epoch}/{self.epochs}]\t {metrics_string}')

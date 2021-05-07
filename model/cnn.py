@@ -32,7 +32,7 @@ class CNN(nn.Module):
         super(CNN, self).__init__()
         if (model == 'resnet18'):
             self.cnn = models.resnet18(pretrained=pretrained)
-            self.cnn.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+            #self.cnn.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
             self.cnn.fc = nn.Linear(512, num_classes)
         elif (model == 'resnet50'):
             self.cnn = models.resnet50(pretrained=pretrained)

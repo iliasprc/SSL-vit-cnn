@@ -1,14 +1,5 @@
-import codecs
-import csv
-import re
-
-import gensim.models
-import gensim.models.fasttext as fasttext
-import gensim.models.word2vec as w2v
 import numpy as np
-from scipy.sparse import csr_matrix
 from sklearn.metrics import roc_curve, auc
-from tqdm import tqdm
 
 
 def union_size(yhat, y, axis):
@@ -144,7 +135,7 @@ def precision_at_k(yhat_raw, y, k):
     return np.mean(vals)
 
 
-def print_metrics(metrics,log):
+def print_metrics(metrics, log):
     print()
     if "auc_macro" in metrics.keys():
         log.info(f"[MACRO] accuracy, precision, recall, f-measure, AUC")
@@ -168,6 +159,8 @@ def print_metrics(metrics,log):
     for metric, val in metrics.items():
         if metric.find("rec_at") != -1:
             log.info(f"%s: %.4f" % (metric, val))
+
+
 def print_metrics2(metrics):
     print()
     if "auc_macro" in metrics.keys():

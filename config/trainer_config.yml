@@ -6,11 +6,11 @@ trainer:
   cuda: True # use nvidia gpu
   gpu: 0 # id of gpu
   save: True # save checkpoint
-  batch_size: 4
+  batch_size: 64
   shape: 224
   load: True # load pretrained checkpoint
   gradient_accumulation: 1 # gradient accumulation steps
-  pretrained_cpkt: /home/iliask/PycharmProjects/CNNs/checkpoints/dataset_STL10/model_pit/date_30_04_2021_16.52.21/_backbone_last_checkpoint.pth.tar
+  pretrained_cpkt: /home/papastrat/PycharmProjects/CNNs/checkpoints/dataset_celeba/model_resnet18/date_02_05_2021_10.33.55/_backbone_last_checkpoint.pth.tar
   log_interval: 10000 # print statistics every log_interval
   model:
     name: resnet18 # model name  [mobilenet_v2,COVIDNet_small]
@@ -40,8 +40,8 @@ trainer:
       num_workers: 2
   dataset:
     input_data: data_dir
-    name: STL10 # dataset name COVIDx or COVID_CT
-    type: clf
+    name: celeba # dataset name COVIDx or COVID_CT
+    type: multi_target # multi_target or clf
     train:
       augmentation: True # do augmentation to video
     val:

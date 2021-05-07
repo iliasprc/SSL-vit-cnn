@@ -126,6 +126,25 @@ def select_cf_dataset(config):
             test_dataset, **val_params
         )
         return train_loader, test_loader, None, train_dataset.classes
-
-
+    elif config.dataset.name == 'celeba':
+        root_dir = os.path.join(config.cwd, config.dataset.input_data)
+        train_dataset = torchvision.datasets.CelebA(root=root_dir, transform=train_transform, split='train',target_type='attr',
+                                                 download=True)
+        val_dataset = torchvision.datasets.CelebA(root=root_dir, transform=train_transform, split='valid',target_type='identity',
+                                                 download=True)
+        test_dataset = torchvision.datasets.CelebA(root=root_dir, transform=train_transform, split='test',target_type='identity',
+                                                 download=True)
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, **train_params
+        )
+        valid_loader = torch.utils.data.DataLoader(
+            val_dataset, **val_params
+        )
+        test_loader = torch.utils.data.DataLoader(
+            test_dataset, **val_params
+        )
+        print(train_dataset.identity.numpy())
+        c = train_dataset.identity.numpy()
+        print(len(c),len(np.unique(c)))
+        return train_loader, valid_loader, test_loader, np.unique(c)
 

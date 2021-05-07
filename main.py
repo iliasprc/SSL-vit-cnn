@@ -59,6 +59,9 @@ def main():
 
     training_generator, val_generator, test_generator, class_dict = select_cf_dataset(config)
     n_classes = len(class_dict)
+    print(class_dict)
+    #if config.dataset.name == 'celeba':
+    n_classes = 40
     model = select_model(config, n_classes, pretrained=True)
 
     #log.info(f"{model}")
@@ -79,16 +82,17 @@ def main():
     model.to(device)
 
     optimizer, scheduler = select_optimizer(model, config['model'], None)
-    log.info(f'{model}')
+    #log.info(f'{model}')
     log.info(f"Checkpoint Folder {cpkt_fol_name} ")
     shutil.copy(os.path.join(config.cwd, config_file), cpkt_fol_name)
-
-    trainer = Trainer(config, model=model, optimizer=optimizer,
-                      data_loader=training_generator, writer=writer, logger=log,
-                      valid_data_loader=val_generator, test_data_loader=test_generator, class_dict=class_dict,
-                      lr_scheduler=scheduler,
-                      checkpoint_dir=cpkt_fol_name)
-    trainer.train()
+    if config.dataset.type == 'multi_target':
+        from trainer.multi_class_trainer import Trainer
+        trainer = Trainer(config, model=model, optimizer=optimizer,
+                          data_loader=training_generator, writer=writer, logger=log,
+                          valid_data_loader=val_generator, test_data_loader=test_generator, class_dict=class_dict,
+                          lr_scheduler=scheduler,
+                          checkpoint_dir=cpkt_fol_name)
+        trainer.train()
 
 
 if __name__ == '__main__':
