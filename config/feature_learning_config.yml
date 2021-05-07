@@ -9,11 +9,11 @@ trainer:
   save: True # save checkpoint
   load: False # load pretrained checkpoint
   gradient_accumulation: 8 # gradient accumulation steps
-  batch_size: 128
+  batch_size: 16
   pretrained_cpkt: cpkt.pt
   log_interval: 10000 # print statistics every log_interval
   model:
-    name: resnet18 # model name  [mobilenet_v2,COVIDNet_small]
+    name: vit # model name  [mobilenet_v2,COVIDNet_small]
     pretrained: False
     optimizer: # optimizer configuration
       type: Adam # optimizer type

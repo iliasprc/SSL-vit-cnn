@@ -6,18 +6,18 @@ trainer:
   cuda: True # use nvidia gpu
   gpu: 0 # id of gpu
   save: True # save checkpoint
-  batch_size: 64
+  batch_size: 4
   shape: 224
   load: True # load pretrained checkpoint
   gradient_accumulation: 1 # gradient accumulation steps
-  pretrained_cpkt: /home/papastrat/PycharmProjects/CNNs/checkpoints/dataset_STL10/model_vit/date_30_04_2021_16.54.13/_backbone_last_checkpoint.pth.tar
+  pretrained_cpkt: /home/iliask/PycharmProjects/CNNs/checkpoints/dataset_STL10/model_pit/date_30_04_2021_16.52.21/_backbone_last_checkpoint.pth.tar
   log_interval: 10000 # print statistics every log_interval
   model:
-    name: vit # model name  [mobilenet_v2,COVIDNet_small]
+    name: resnet18 # model name  [mobilenet_v2,COVIDNet_small]
     pretrained: False
     optimizer: # optimizer configuration
-      type: Adam # optimizer type
-      lr: 1e-4 # learning rate
+      type: SGD # optimizer type
+      lr: 1e-2 # learning rate
       weight_decay: 0.000001 # weight decay
     scheduler: # learning rate scheduler
       type: ReduceLRonPlateau # type of scheduler

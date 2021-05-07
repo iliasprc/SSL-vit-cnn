@@ -74,10 +74,12 @@ class CNN(nn.Module):
             #     emb_dropout = 0.2
             # )
             # cnn.mlp_head = nn.Identity()
-            self.cnn = timm.create_model('vit_small_patch16_224', pretrained=pretrained, img_size=224,num_classes=num_classes)
+            self.cnn = timm.create_model('vit_small_patch16_224', pretrained=pretrained, img_size=224, num_classes=num_classes)
             in_feats = embed_dim
             #
             #self.cnn.head = nn.Identity()
+        elif model == 'pit':
+            self.cnn = timm.create_model('pit_ti_224', pretrained=pretrained,img_size=224, num_classes=num_classes)
     def forward(self, x):
 
         return self.cnn(x)
