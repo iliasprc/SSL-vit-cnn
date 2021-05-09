@@ -7,17 +7,17 @@ trainer:
   gpu: 1 # id of gpu
   shape: 224
   save: True # save checkpoint
-  load: False # load pretrained checkpoint
-  gradient_accumulation: 8 # gradient accumulation steps
+  load: True # load pretrained checkpoint
+  gradient_accumulation: 32 # gradient accumulation steps
   batch_size: 16
-  pretrained_cpkt: cpkt.pt
+  pretrained_cpkt: /home/papastrat/PycharmProjects/CNNs/checkpoints/dataset_celeba/model_pit/date_03_05_2021_17.17.42/_model_last_checkpoint.pth.tar
   log_interval: 10000 # print statistics every log_interval
   model:
-    name: vit # model name  [mobilenet_v2,COVIDNet_small]
+    name: pit # model name  [mobilenet_v2,COVIDNet_small]
     pretrained: False
     optimizer: # optimizer configuration
       type: Adam # optimizer type
-      lr: 1e-4 # learning rate
+      lr: 1e-3 # learning rate
       weight_decay: 0.00001 # weight decay
     scheduler: # learning rate scheduler
       type: ReduceLRonPlateau # type of scheduler

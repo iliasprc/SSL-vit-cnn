@@ -130,9 +130,9 @@ def select_cf_dataset(config):
         root_dir = os.path.join(config.cwd, config.dataset.input_data)
         train_dataset = torchvision.datasets.CelebA(root=root_dir, transform=train_transform, split='train',target_type='attr',
                                                  download=True)
-        val_dataset = torchvision.datasets.CelebA(root=root_dir, transform=train_transform, split='valid',target_type='identity',
+        val_dataset = torchvision.datasets.CelebA(root=root_dir, transform=train_transform, split='valid',target_type='attr',
                                                  download=True)
-        test_dataset = torchvision.datasets.CelebA(root=root_dir, transform=train_transform, split='test',target_type='identity',
+        test_dataset = torchvision.datasets.CelebA(root=root_dir, transform=train_transform, split='test',target_type='attr',
                                                  download=True)
         train_loader = torch.utils.data.DataLoader(
             train_dataset, **train_params

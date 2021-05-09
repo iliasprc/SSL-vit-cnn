@@ -98,7 +98,7 @@ class Trainer(BaseTrainer):
             # print_metrics(metrics)
 
         k = 5
-        metrics = all_metrics(np.concatenate(yhat, axis=0), np.concatenate(y, axis=0), 5,
+        metrics = all_metrics(np.concatenate(yhat, axis=0), np.concatenate(y, axis=0),1,
                               np.concatenate(yhat_raw, axis=0))
         print_metrics(metrics, self.logger)
         # metrics = all_metrics(yhat, y, k=k, yhat_raw=yhat_raw)
@@ -144,7 +144,7 @@ class Trainer(BaseTrainer):
             # print_metrics(metrics)
 
         k = 5
-        metrics = all_metrics(np.concatenate(yhat, axis=0), np.concatenate(y, axis=0), 5,
+        metrics = all_metrics(np.concatenate(yhat, axis=0), np.concatenate(y, axis=0), 1,
                               np.concatenate(yhat_raw, axis=0))
         print_metrics(metrics, self.logger)
         self._progress(batch_idx, epoch, metrics=self.valid_metrics, mode=mode, print_summary=True)
@@ -170,9 +170,9 @@ class Trainer(BaseTrainer):
 
             self.checkpointer(epoch, validation_loss)
             self.lr_scheduler.step(validation_loss)
-            # if self.do_test:
-            #     self.logger.info(f"{'!' * 10}    VALIDATION   , {'!' * 10}")
-            #     self.predict(epoch)
+            if self.do_test:
+                self.logger.info(f"{'!' * 10}    TEST   , {'!' * 10}")
+                self._valid_epoch(epoch, 'TEST', self.test_data_loader)
 
     def predict(self, epoch):
         """

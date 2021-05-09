@@ -4,12 +4,12 @@ trainer:
   epochs: 100 # number of training epochs
   seed: 123 # randomness seed
   cuda: True # use nvidia gpu
-  gpu: 0 # id of gpu
+  gpu: 1 # id of gpu
   save: True # save checkpoint
-  batch_size: 64
+  batch_size: 4
   shape: 224
-  load: True # load pretrained checkpoint
-  gradient_accumulation: 1 # gradient accumulation steps
+  load: False # load pretrained checkpoint
+  gradient_accumulation: 32 # gradient accumulation steps
   pretrained_cpkt: /home/papastrat/PycharmProjects/CNNs/checkpoints/dataset_celeba/model_resnet18/date_02_05_2021_10.33.55/_backbone_last_checkpoint.pth.tar
   log_interval: 10000 # print statistics every log_interval
   model:
