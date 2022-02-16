@@ -4,6 +4,11 @@ Tested self-supervised technique Exploring simple siamese representation learnin
 [Exploring Simple Siamese Representation Learning](https://openaccess.thecvf.com/content/CVPR2021/papers/Chen_Exploring_Simple_Siamese_Representation_Learning_CVPR_2021_paper.pdf)
 
 
+![ssl](images/selfsupervised.png)
+
+
+ 
+
 Git: https://github.com/facebookresearch/simsiam
 
 ## Requirements
@@ -27,6 +32,12 @@ You can resume from a previously saved checkpoint and run the supervised task  f
   ```
 
 ## Results
+
+### Training diagram
+
+![results](images/similarity.png)
+
+### Tables from paper
 
 | Image size    | Pretrain | Dataset  | Validation acc | Test acc       |
 |---------------|----------|----------|----------------|----------------|
